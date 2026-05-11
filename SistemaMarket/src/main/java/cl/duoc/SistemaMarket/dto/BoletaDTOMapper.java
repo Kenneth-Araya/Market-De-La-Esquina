@@ -1,6 +1,7 @@
 package cl.duoc.SistemaMarket.dto;
 
 import org.springframework.stereotype.Component;
+import cl.duoc.SistemaMarket.dto.BoletaDTO;
 import cl.duoc.SistemaMarket.model.Boleta;
 import cl.duoc.SistemaMarket.model.Proveedor;
 import cl.duoc.SistemaMarket.service.ProveedorService;
