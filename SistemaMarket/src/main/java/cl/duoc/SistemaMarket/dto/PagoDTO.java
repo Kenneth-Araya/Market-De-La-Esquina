@@ -16,10 +16,10 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class PagoDTO {
     @NotNull(message = "El codigo transaccion es obligatorio")
-    private String codigoTransaccion;
+    private String codigoTransaccionPago;
 
     @NotNull(message = "El monto es obligatorio")
-    private Double monto;
+    private Double montoPago;
 
     @NotNull(message = "El metodo de pago es obligatorio")
     private String metodoPago;
@@ -28,8 +28,8 @@ public class PagoDTO {
     private LocalDateTime fechaPago;
 
     @NotNull(message = "La fecha de creacion es obligatoria")
-    private LocalDateTime fechaCreacion;
+    private LocalDateTime fechaCreacionPago;
 
     @Min(value = 1, message = "La descripcion es obligatoria")
-    private String descripcion;
+    private String descripcionPago;
 }

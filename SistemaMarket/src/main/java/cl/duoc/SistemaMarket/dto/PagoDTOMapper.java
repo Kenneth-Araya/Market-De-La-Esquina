@@ -8,12 +8,11 @@ public class PagoDTOMapper {
         if (pago == null) {
             return null;
         }
-
         PagoDTO pagoDTO = new PagoDTO();
-        pagoDTO.setCodigoTransaccion(pago.getCodigoTransaccion());
-        pagoDTO.setFechaCreacion(pago.getFechaCreacion());
-        pagoDTO.setDescripcion(pago.getDescripcion());
-        pagoDTO.setMonto(pago.getMonto());
+        pagoDTO.setCodigoTransaccionPago(pago.getCodigoTransaccionPago());
+        pagoDTO.setFechaCreacionPago(pago.getFechaCreacionPago());
+        pagoDTO.setDescripcionPago(pago.getDescripcionPago());
+        pagoDTO.setMontoPago(pago.getMontoPago());
         pagoDTO.setMetodoPago(pago.getMetodoPago());
         pagoDTO.setFechaPago(pago.getFechaPago());
         return pagoDTO;
@@ -23,12 +22,11 @@ public class PagoDTOMapper {
         if (pagoDTO == null) {
             return null;
         }
-
         Pago pago = new Pago();
-        pago.setCodigoTransaccion(pagoDTO.getCodigoTransaccion());
-        pago.setFechaCreacion(pagoDTO.getFechaCreacion());
-        pago.setDescripcion(pagoDTO.getDescripcion());
-        pago.setMonto(pagoDTO.getMonto());
+        pago.setCodigoTransaccionPago(pagoDTO.getCodigoTransaccionPago());
+        pago.setFechaCreacionPago(pagoDTO.getFechaCreacionPago());
+        pago.setDescripcionPago(pagoDTO.getDescripcionPago());
+        pago.setMontoPago(pagoDTO.getMontoPago());
         pago.setMetodoPago(pagoDTO.getMetodoPago());
         pago.setFechaPago(pagoDTO.getFechaPago());
         return pago;
