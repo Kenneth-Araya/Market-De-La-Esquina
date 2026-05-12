@@ -31,7 +31,7 @@ public class UsuarioController {
         .ok(usuarioDTOs);
     }
 
-    //Crear usuarios
+    //Guardar usuarios
     @PostMapping
     public ResponseEntity<UsuarioDTO> guardarUsuario(@Valid @RequestBody UsuarioDTO usuarioDTO){
         UsuarioDTO creado = usuarioService.guardarUsuario(usuarioDTO);

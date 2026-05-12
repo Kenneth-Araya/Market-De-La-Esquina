@@ -3,7 +3,6 @@ package cl.duoc.SistemaMarket.service;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
 import cl.duoc.SistemaMarket.dto.UsuarioDTO;
 import cl.duoc.SistemaMarket.dto.UsuarioDTOMapper;
 import cl.duoc.SistemaMarket.model.Usuario;
@@ -36,19 +35,11 @@ public class UsuarioService {
         usuarioRepository.deleteById(id);
     }
 
-    //Buscar usuarios por id 
-    public UsuarioDTO findById(int id) {
-        Usuario usuario = usuarioRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
-
-        return UsuarioDTOMapper.toDto(usuario);
-    }
-
     //Actualizar usuarios
     public UsuarioDTO actualizarUsuario(int id, UsuarioDTO dto) {
 
         Usuario usuario = usuarioRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+        .orElseThrow(() -> new RuntimeException("El Usuario no fue encontrado"));
 
         usuario.setNombreUsuario(dto.getNombreUsuarioDto());
         usuario.setRutUsuario(dto.getRutUsuarioDto());
@@ -57,6 +48,14 @@ public class UsuarioService {
 
         Usuario actualizado = usuarioRepository.save(usuario);
         return UsuarioDTOMapper.toDto(actualizado);
+    }
+
+    //Buscar usuarios por id 
+    public UsuarioDTO findById(int id) {
+        Usuario usuario = usuarioRepository.findById(id)
+        .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+
+        return UsuarioDTOMapper.toDto(usuario);
     }
 }
 

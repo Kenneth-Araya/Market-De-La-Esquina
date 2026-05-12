@@ -1,17 +1,12 @@
 package cl.duoc.SistemaMarket.dto;
 
 import org.springframework.stereotype.Component;
-import cl.duoc.SistemaMarket.dto.BoletaDTO;
 import cl.duoc.SistemaMarket.model.Boleta;
-import cl.duoc.SistemaMarket.model.Proveedor;
-import cl.duoc.SistemaMarket.service.ProveedorService;
 import lombok.RequiredArgsConstructor;
 
 @Component
 @RequiredArgsConstructor
 public class BoletaDTOMapper {
-    
-    private final ProveedorService proveedorService;
 
     public BoletaDTO toDTO(Boleta boleta){
         if (boleta == null) {
@@ -20,7 +15,6 @@ public class BoletaDTOMapper {
 
         BoletaDTO boletaDTO = new BoletaDTO();
         boletaDTO.setFolio(boleta.getFolioBoleta());
-        boletaDTO.setRutProveedor(boleta.getProveedorBoleta().getRut());
         boletaDTO.setGlosa(boleta.getGlosaBoleta());
         boletaDTO.setTipo(boleta.getTipoBoleta());
         boletaDTO.setFecha(boleta.getFechaEmisionBoleta());
@@ -34,11 +28,8 @@ public class BoletaDTOMapper {
             return null;
         }
 
-        Proveedor proveedor = proveedorService.findByRutProveedor(boletaDTO.getRutProveedor());
-
         Boleta boleta = new Boleta();
         boleta.setFolioBoleta(boletaDTO.getFolio());
-        boleta.setProveedorBoleta(proveedor);
         boleta.setGlosaBoleta(boletaDTO.getGlosa());
         boleta.setTipoBoleta(boletaDTO.getTipo());
         boleta.setFechaEmisionBoleta(boletaDTO.getFecha());

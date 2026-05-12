@@ -4,22 +4,22 @@ import java.time.LocalDateTime;
 import org.springframework.stereotype.Service;
 import cl.duoc.SistemaMarket.client.BoletaClient;
 import cl.duoc.SistemaMarket.dto.BoletaPagoDTO;
-import cl.duoc.SistemaMarket.model.Pago;
-import cl.duoc.SistemaMarket.repository.PagoRepository;
+import cl.duoc.SistemaMarket.model.Venta;
+import cl.duoc.SistemaMarket.repository.VentaRepository;
 import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
-public class BoletaPagoService {
+public class BoletaVentaService {
 
     private final BoletaClient boletaClient;
-    private final PagoRepository pagoRepository;
+    private final VentaRepository VentaRepository;
 
     public BoletaPagoDTO obtenerBoleta(String folio) {
         return boletaClient.obtenerBoleta(folio);
     }
 
-    public void autorizarPago(String folio) {
+    public void autorizarVenta(String folio) {
         
         //Obtener boleta
         BoletaPagoDTO boleta = boletaClient.obtenerBoleta(folio);
@@ -33,20 +33,19 @@ public class BoletaPagoService {
             throw new RuntimeException("Boleta ya pagada");
         }
 
-        //Registrar pago
-        Pago pago = new Pago();
-        pago.setCodigoTransaccionPago("TX-" + folio);
-        pago.setMontoPago(boleta.getMonto().doubleValue());
-        pago.setMetodoPago("EFECTIVO");
-        pago.setEstadoPago("PAGADO");
-        pago.setFechaPago(LocalDateTime.now());
-        pago.setFechaCreacionPago(LocalDateTime.now());
-        pago.setMonedaPago("CLP");
-        pago.setDescripcionPago("Pago autorizado para boleta " + folio);
+        //Registrar venta
+        Venta venta = new Venta();
+        venta.setFechaVenta(LocalDateTime.now());
+        venta.setTotalVenta(999.999);
+        venta.setDescripcionVenta("Pago autorizado para boleta " + folio);
+        venta.setMontoVenta(boleta.getMonto().doubleValue());
+        venta.setMetodoVenta("DEBITO");
+        venta.setEstadoVenta("PAGADO");
+        venta.setCodigoTransaccionVenta("TX-" + folio);
 
-        pagoRepository.save(pago);
+        VentaRepository.save(venta);
 
-        //Actualizar boleta en otro MS
+        //Actualizar boleta
         boletaClient.marcarComoPagada(folio);
     }
 }
