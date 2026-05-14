@@ -22,19 +22,19 @@ public class Producto {
     private Long id;
 
     @Column(nullable = false, length = 13, unique=true)
-    private String codigoBarra;
+    private String codigoBarraProducto;
 
     @Column(nullable = false, length = 50)
-    private String nombre;
+    private String nombreProducto;
 
     @Column(nullable = false, length = 100)
-    private String descripcion;
+    private String descripcionProducto;
 
     @Column(nullable = false, length = 100)
-    private double precioProducto;
+    private double precioProductoProducto;
 
     @Column(nullable = false, length = 20, unique = true)
-    private Long categoriaId;
+    private Long categoriaIdProducto;
 
 }
 
