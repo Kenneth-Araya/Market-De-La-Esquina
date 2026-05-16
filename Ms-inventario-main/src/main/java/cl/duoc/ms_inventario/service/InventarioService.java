@@ -1,24 +1,25 @@
 package cl.duoc.ms_inventario.service;
 import java.time.LocalDate;
 import java.util.List;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import cl.duoc.ms_inventario.clients.ProductoClient;
 import cl.duoc.ms_inventario.dto.InventarioDTO;
 import cl.duoc.ms_inventario.dto.InventarioMapper;
+import cl.duoc.ms_inventario.dto.ProductoResponseDTO;
 import cl.duoc.ms_inventario.model.Inventario;
 import cl.duoc.ms_inventario.repository.InventarioRepository;
 import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-
+@RequiredArgsConstructor
 @Service
 @Slf4j
 public class InventarioService {
-    @Autowired
-    private  InventarioRepository repo;
-
-    @Autowired
-    private  InventarioMapper mapper;
+    private final InventarioRepository repo;
+    private final InventarioMapper mapper;
+    private final ProductoClient productoClient;
 
     public InventarioDTO validarObteniendoStock(Long idProducto){
         log.info("Iniciando validacion de stock para el producto: {}",idProducto);
@@ -39,7 +40,19 @@ public class InventarioService {
             dto.setEstadoProducto("DISPONIBLE");
         }
 
-        return dto;   
+        try{
+            log.info("Cruzando puente Feign hacia ms-producto para el id: {}",idProducto);
+            ProductoResponseDTO productoDto=productoClient.obtenerProductoPorId(idProducto);
+            if (productoDto!=null) {
+                log.info("Feign funciono correctamente Seteando nombre del producto en el DTO");
+                dto.setNombreProducto(productoDto.getNombre());
+            }
+        }catch (Exception e){
+            log.error("No se pudo conectar con ms-producto a través de Feign: {}", e.getMessage());
+        }
+
+        return dto;
+
         }
 
     @Transactional
