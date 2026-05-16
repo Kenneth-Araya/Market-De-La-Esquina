@@ -7,5 +7,5 @@ import cl.duoc.ms_producto.model.Producto;
 
 @Repository
 public interface ProductoRepository extends JpaRepository<Producto, Long>  {
-
+    boolean existsByNombre(String nombre);
 }

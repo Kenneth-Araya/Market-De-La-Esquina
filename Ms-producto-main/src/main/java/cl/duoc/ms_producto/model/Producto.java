@@ -37,7 +37,7 @@ public class Producto {
     @Column(length=100)
     private String descripcion;
 
-    @Positive(message="el precio debe ser mayor que cero")
+    @Positive(message="el precio debe ser mayor que cero para cumplir con las reglas del negocio")
     @NotNull(message="el precio debe estar asignado obligatoriamente")
     @Column(nullable=false)
     private double precioProducto;
