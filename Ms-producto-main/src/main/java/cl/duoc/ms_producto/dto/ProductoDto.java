@@ -25,7 +25,7 @@ public class ProductoDTO {
 
     @Positive(message = "el valor debe ser mayor que cero")
     @NotNull(message = "el producto debe tener un valor obligatorio")
-    private double precioProducto;
+    private Double precioProducto;
 
     @NotNull(message = "el producto debe pertenecer a una categoria")
     private Long categoriaId;
