@@ -1,7 +1,7 @@
 package cl.duoc.ms_producto.controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import cl.duoc.ms_producto.dto.ProductoDto;
+import cl.duoc.ms_producto.dto.ProductoDTO;
 import cl.duoc.ms_producto.service.ProductoService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -24,48 +24,46 @@ import org.springframework.web.bind.annotation.PutMapping;
 public class ProductoController {
     private final ProductoService service;
 
-    //LISTAR TODOS LOS PRODUCTOS 
-    @GetMapping("")
-    public ResponseEntity<List<ProductoDto>> listarProductos() {
-        List<ProductoDto> productos=service.listarProductos();
-        return ResponseEntity.ok(productos);
+    //Listar productos
+    @GetMapping
+    public ResponseEntity<List<ProductoDTO>> listarProductos() {
+        List<ProductoDTO> productos = service.listarProductos();
+        return ResponseEntity
+        .ok(productos);
+    }
+   
+    //Crear producto
+    @PostMapping
+    public ResponseEntity<ProductoDTO> guardarProducto(@Valid @RequestBody ProductoDTO productoDto) {
+        ProductoDTO creado = service.guardarProducto(productoDto);
+        return ResponseEntity
+        .status(HttpStatus.CREATED)
+        .body(creado);
     }
 
-    //BUSCAR PRODUCTO POR ID
-    @GetMapping("/{id}")
-    public ResponseEntity<ProductoDto> listarProductoPorId(@PathVariable Long id) {
-        ProductoDto producto=service.buscarProducto(id);
-        return ResponseEntity
-               .ok(producto);
-    }
-    
-    
-    //CREAR UN NUEVO PRODUCTO
-    @PostMapping("")
-    public ResponseEntity<ProductoDto> guardarProducto(@Valid @RequestBody ProductoDto productoDto) {
-        ProductoDto creado=service.guardarProducto(productoDto);
-        return ResponseEntity
-                .status(HttpStatus.CREATED)
-                .body(creado);
-    }
-
-    //ELIMINAR UN PRODUCTO POR ID 
+    //Eliminar producto
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> eliminarProducto(@PathVariable Long id){
         service.eliminarProducto(id);
         return ResponseEntity
-               .noContent()
-               .build();
+        .noContent()
+        .build();
     }
 
-
-    //ACTUALIZAR UN PRODUCTO EXISTENTE 
+    //Actualizar producto
     @PutMapping("/{id}")
-    public ResponseEntity<ProductoDto> actualizarProducto(@PathVariable Long id,@Valid @RequestBody ProductoDto dto) {
-        ProductoDto actualizado=service.actualizarProducto(id, dto);
+    public ResponseEntity<ProductoDTO> actualizarProducto(@PathVariable Long id,@Valid @RequestBody ProductoDTO dto) {
+        ProductoDTO actualizado=service.actualizarProducto(id, dto);
         return ResponseEntity
-               .ok(actualizado);
+        .ok(actualizado);
     }
 
+    //Buscar por id
+    @GetMapping("/{id}")
+    public ResponseEntity<ProductoDTO> listarProductoPorId(@PathVariable Long id) {
+        ProductoDTO producto=service.buscarProducto(id);
+        return ResponseEntity
+        .ok(producto);
+    }
 
 }

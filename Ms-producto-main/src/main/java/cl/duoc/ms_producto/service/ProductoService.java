@@ -1,11 +1,10 @@
 package cl.duoc.ms_producto.service;
-
 import java.util.List;
 import java.util.Optional;
 import org.springframework.stereotype.Service;
-import cl.duoc.ms_producto.dto.ProductoDto;
-import cl.duoc.ms_producto.dto.ProductoDtoMapper;
-import cl.duoc.ms_producto.exception.ResourceNotFoundException;
+import cl.duoc.ms_producto.dto.ProductoDTO;
+import cl.duoc.ms_producto.dto.ProductoDTOMapper;
+import cl.duoc.ms_producto.exception.RecursoNoEncontradoException;
 import cl.duoc.ms_producto.model.Producto;
 import cl.duoc.ms_producto.repository.ProductoRepository;
 import lombok.RequiredArgsConstructor;
@@ -16,41 +15,38 @@ public class ProductoService {
 
     private final ProductoRepository repo;
 
-    //LISTAR PRODUCTOS
-    public List<ProductoDto> listarProductos(){
+
+    //Listar producto
+    public List<ProductoDTO> listarProductos(){
         return repo.findAll()
         .stream()
-        .map(ProductoDtoMapper::toDto)
+        .map(ProductoDTOMapper::toDto)
         .toList();
     }
 
-    //AGREGAR PRODUCTO
-    public ProductoDto guardarProducto(ProductoDto dto){
-        Producto entidad=ProductoDtoMapper.toEntity(dto);
-        Producto guardado=repo.save(entidad);
-        return ProductoDtoMapper.toDto(guardado);
+    //Guardar producto
+    public ProductoDTO guardarProducto(ProductoDTO dto){
+        Producto producto =ProductoDTOMapper.toEntity(dto);
+        Producto guardado=repo.save(producto);
+        return ProductoDTOMapper.toDto(guardado);
     }
 
-    //ELIMINAR PRODUCTO 
-    public boolean eliminarProducto(Long id){
-        if (repo.existsById(id)){
-            repo.deleteById(id); 
-            return true;    
-        }
-        return false;
+    //Eliminar producto
+    public void eliminarProducto(Long id){
+        repo.deleteById(id);
     }
 
-    //BUSCAR PRODUCTO POR ID
-    public ProductoDto buscarProducto(Long id){
+    //Buscar producto por id 
+    public ProductoDTO buscarProducto(Long id){
         Optional<Producto> resultado = repo.findById(id);
         if (resultado.isPresent()) {
-            return ProductoDtoMapper.toDto(resultado.get());
+            return ProductoDTOMapper.toDto(resultado.get());
         }
-        throw new ResourceNotFoundException("no existe el producto con Id: "+id);
+        throw new RecursoNoEncontradoException("no existe el producto con Id: "+id);
     }
 
-    //ACTUALIZAR PRODUCTO
-    public ProductoDto actualizarProducto(Long id,ProductoDto dto){
+    //Actualizar producto
+    public ProductoDTO actualizarProducto(Long id,ProductoDTO dto){
         Optional<Producto>resultado=repo.findById(id);
         if (resultado.isPresent()) {
             Producto producto=resultado.get();
@@ -62,9 +58,8 @@ public class ProductoService {
 
             Producto actualizado=repo.save(producto);
 
-            return ProductoDtoMapper.toDto(actualizado);
+            return ProductoDTOMapper.toDto(actualizado);
         }
-        return null;
+        throw new RecursoNoEncontradoException("no existe el producto con Id: "+id);
     }
-    
 }

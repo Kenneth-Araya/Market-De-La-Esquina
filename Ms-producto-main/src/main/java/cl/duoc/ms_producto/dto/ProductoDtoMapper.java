@@ -2,9 +2,9 @@ package cl.duoc.ms_producto.dto;
 
 import cl.duoc.ms_producto.model.Producto;
 
-public class ProductoDtoMapper {
+public class ProductoDTOMapper {
 
-    public static Producto toEntity(ProductoDto dto){
+    public static Producto toEntity(ProductoDTO dto){
         if(dto==null){
             return null;
         }
@@ -19,12 +19,12 @@ public class ProductoDtoMapper {
 
     }
 
-    public static ProductoDto toDto(Producto prod){
+    public static ProductoDTO toDto(Producto prod){
         if(prod==null){
             return null;
         }
 
-        ProductoDto dto=new ProductoDto();
+        ProductoDTO dto=new ProductoDTO();
         dto.setCodigoBarra(prod.getCodigoBarra());
         dto.setNombre(prod.getNombre());
         dto.setDescripcion(prod.getDescripcion());

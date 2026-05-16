@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class ProductoDto {
+public class ProductoDTO {
     @NotBlank(message = "el codigo de barra tiene que tener un valor")
     @Size(max=13,message="El codigo de barra debe tener 13 caracteres para cumplir")
     private String codigoBarra;
