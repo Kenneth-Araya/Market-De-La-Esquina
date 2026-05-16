@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 
 
 @RestController
-@RequestMapping("api/inventario")
+@RequestMapping("api/v1/inventario")
 @RequiredArgsConstructor
 public class InventarioController {
     private final InventarioService service;

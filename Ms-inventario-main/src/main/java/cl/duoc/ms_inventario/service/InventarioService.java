@@ -61,9 +61,13 @@ public class InventarioService {
     public List<InventarioDTO>listarVencidos(){
         log.info("generando reporte de los productos que ya estan vencidos");
         return repo.findAll().stream()
-                .filter(i->i.getFechaVencimiento()!=null && i.getFechaVencimiento().isBefore(LocalDate.now()))
-                .map(mapper::toDTO)
-                .toList();
+            .filter(i -> i.getFechaVencimiento() != null && i.getFechaVencimiento().isBefore(LocalDate.now()))
+            .map(i -> {
+                InventarioDTO dto = mapper.toDTO(i);
+                dto.setEstadoProducto("BLOQUEADO - VENCIDO"); // ‹- Se lo asignamos en el vuelo
+                return dto;
+            })
+            .toList();
     }  
     
     public List<InventarioDTO>listarBajoStock(int limite){
