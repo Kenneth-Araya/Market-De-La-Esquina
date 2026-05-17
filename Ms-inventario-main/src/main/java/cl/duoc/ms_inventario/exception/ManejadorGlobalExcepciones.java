@@ -2,14 +2,22 @@ package cl.duoc.ms_inventario.exception;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-@RestController
+@RestControllerAdvice
 public class ManejadorGlobalExcepciones {
      @ExceptionHandler(RecursoNoEncontradoException.class)
     public ResponseEntity<ErrorResponse> handleRecursoNoEncontrado(RecursoNoEncontradoException e) {
         ErrorResponse error = new ErrorResponse("Recurso no encontrado", e.getMessage());
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
+    }
+
+    @ExceptionHandler(org.springframework.web.method.annotation.MethodArgumentTypeMismatchException.class)
+    public ResponseEntity<ErrorResponse> handleTypeMismatchException(org.springframework.web.method.annotation.MethodArgumentTypeMismatchException e) {
+        String mensajeDetails = String.format("El parámetro '%s' debe ser un número válido. Valor recibido: '%s'", 
+                e.getName(), e.getValue());
+        ErrorResponse error = new ErrorResponse("Petición incorrecta (Parámetro inválido)", mensajeDetails);
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error); // 👈 Devuelve un hermoso 400
     }
 
     @ExceptionHandler(Exception.class)
@@ -18,7 +26,7 @@ public class ManejadorGlobalExcepciones {
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
     }
 
-    public class ErrorResponse {
+    public static class ErrorResponse {
         private String error;
         private String mensaje;
 

@@ -29,23 +29,17 @@ public class InventarioController {
         return ResponseEntity.ok(service.validarObteniendoStock(id));
     }
 
-    // 2. Descontar stock (Este lo llamará el ms-boleta tras una venta exitosa)
+    // 2. Descontar stock 
     @PostMapping("/{id}")
     public ResponseEntity<String> descontarStock(@PathVariable Long id, @RequestParam int cantidad) {
         service.descontarStock(id, cantidad);
-        return ResponseEntity.ok("Stock actualizado: se descontaron"+cantidad+ "unidades");
+        return ResponseEntity.ok("Stock actualizado: se descontaron"+ cantidad + " unidades ");
     }
 
-    // 3. Reporte de productos vencidos
-    @GetMapping("/vencidos")
-    public ResponseEntity<List<InventarioDTO>> listarVencidos() {
-        return ResponseEntity.ok(service.listarVencidos());
-    }
-    
     // 4. Reporte de stock bajo (Ejemplo: limite = 5)
-    @GetMapping("/reporte")
-    public ResponseEntity<List<InventarioDTO>> listarBajoStock(@RequestParam int limite) {
-        return ResponseEntity.ok(service.listarBajoStock(limite));
+    @GetMapping("/bajo/{limite}")
+    public ResponseEntity<List<InventarioDTO>> listarBajoStock(@PathVariable int limite) {
+        return ResponseEntity.ok(service.listarProductosBajoStock(limite));
     }
     
     
