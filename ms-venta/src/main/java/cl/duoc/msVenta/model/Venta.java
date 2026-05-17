@@ -42,4 +42,5 @@ public class Venta {
 
     @Column(nullable = false, unique = true)
     private String codigoTransaccionVenta;        
+
 }
