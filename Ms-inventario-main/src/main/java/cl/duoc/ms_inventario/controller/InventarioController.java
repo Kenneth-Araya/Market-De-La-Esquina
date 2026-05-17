@@ -42,7 +42,8 @@ public class InventarioController {
         return ResponseEntity.ok(service.listarProductosBajoStock(limite));
     }
     
-    
+    //PARA LA SIGUIENTE ENTREGA SE IMPLEMENTARA EL AGREGAR 
+    // STOCK DEBIDO A QUE AUN NO HAY UN MICROSERVICIO PROVEEDOR 
 
     
 }
