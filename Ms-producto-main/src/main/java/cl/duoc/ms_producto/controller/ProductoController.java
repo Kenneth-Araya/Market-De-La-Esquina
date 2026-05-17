@@ -25,8 +25,7 @@ public class ProductoController {
     @GetMapping
     public ResponseEntity<List<ProductoDTO>> listarProductos() {
         List<ProductoDTO> productos = service.listarProductos();
-        return ResponseEntity
-        .ok(productos);
+        return ResponseEntity.ok(productos);
     }
    
     //Crear producto

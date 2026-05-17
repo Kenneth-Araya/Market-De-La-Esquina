@@ -23,5 +23,8 @@ public class InventarioDTO {
     //PARA LA COMUNICACION CON EL MICROSERVICIO DE BOLETA
     private String estadoProducto; 
 
+    //Aquí guardaremos el nombre que traiga Feign
+    private String nombreProducto;
+
 
 }
