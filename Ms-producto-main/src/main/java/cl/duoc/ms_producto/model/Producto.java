@@ -43,6 +43,6 @@ public class Producto {
     private double precioProducto;
 
     @NotNull(message="la categoria del producto debe ser obligatoria")
-    private Long categoriaId;
+    private Long categoriaId;//1. Bebidas 2.Abarrotes 3. Infusiones
 
 }
