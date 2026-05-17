@@ -12,14 +12,15 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 
 @RestController
 @RequestMapping("api/v1/productos")
 @RequiredArgsConstructor
 public class ProductoController {
     private final ProductoService service;
+    
 
     //Listar productos
     @GetMapping
@@ -46,12 +47,11 @@ public class ProductoController {
         .build();
     }
 
-    //Actualizar producto
+    // Actualizar producto
     @PutMapping("/{id}")
-    public ResponseEntity<ProductoDTO> actualizarProducto(@PathVariable Long id,@Valid @RequestBody ProductoDTO dto) {
-        ProductoDTO actualizado=service.actualizarProducto(id, dto);
-        return ResponseEntity
-        .ok(actualizado);
+    public ResponseEntity<ProductoDTO> actualizarProducto(@PathVariable Long id, @Valid @RequestBody ProductoDTO dto) {
+        ProductoDTO actualizado = service.actualizarProducto(id, dto);
+        return ResponseEntity.ok(actualizado);
     }
 
     //Buscar por id

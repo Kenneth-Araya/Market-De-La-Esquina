@@ -38,11 +38,11 @@ public class Producto {
     private String descripcion;
 
     @Positive(message="el precio debe ser mayor que cero para cumplir con las reglas del negocio")
-    @NotNull(message="el precio debe estar asignado obligatoriamente")
     @Column(nullable=false)
     private double precioProducto;
 
     @NotNull(message="la categoria del producto debe ser obligatoria")
+    @Column(name="categoria_id")
     private Long categoriaId;//1. Bebidas 2.Abarrotes 3. Infusiones
 
 }

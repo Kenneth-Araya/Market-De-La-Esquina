@@ -20,9 +20,8 @@ public class ProductoService {
     //Listar producto
     public List<ProductoDTO> listarProductos(){
         log.info("Listando productos...");
-
-        return repo.findAll()
-        .stream()
+        List<Producto> productos = repo.findAllByOrderByIdAsc();
+        return productos.stream()
         .map(ProductoDTOMapper::toDto)
         .toList();
     }
