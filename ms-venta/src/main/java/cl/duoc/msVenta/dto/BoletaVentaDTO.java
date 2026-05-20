@@ -9,7 +9,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class BoletaVentaDTO {
-
     private String folio;
     private String glosa;
     private String tipo;

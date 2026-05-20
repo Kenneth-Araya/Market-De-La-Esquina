@@ -41,6 +41,9 @@ public class Venta {
     private String estadoVenta;       
 
     @Column(nullable = false, unique = true)
-    private String codigoTransaccionVenta;        
-
+    private String codigoTransaccionVenta;      
+    
+    //ManyToOne: muchas ventas pertenecen a un usuario
+    @Column(name = "id_usuario", nullable = false)
+    private Long idUsuario;
 }
