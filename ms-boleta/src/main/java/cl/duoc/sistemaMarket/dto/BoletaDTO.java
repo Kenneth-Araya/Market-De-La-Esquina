@@ -33,8 +33,4 @@ public class BoletaDTO {
 
     @NotNull(message = "El estado de emisión es obligatoria")
     private String estado;
-
-    //referencia a producto
-    @NotNull(message = "La boleta debe contener al menos un producto")
-    private java.util.List<String> productos;
 }

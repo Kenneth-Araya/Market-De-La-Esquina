@@ -66,12 +66,6 @@ public class BoletaService {
             throw new IllegalArgumentException("La boleta o su número de folio no pueden ser nulos o vacíos");
         }
 
-        // Regla de negocio: debe tener productos
-        if (boletaDTO.getProductos() == null || boletaDTO.getProductos().isEmpty()) {
-            log.error("Validación fallida: la boleta con folio {} no tiene productos asociados", boletaDTO.getFolio());
-            throw new IllegalArgumentException("No se puede generar una boleta sin productos");
-        }
-
         // Regla de negocio: fecha no futura
         if (boletaDTO.getFecha() != null && boletaDTO.getFecha().isAfter(LocalDate.now())) {
             log.error("Validación fallida: la fecha {} es posterior a la fecha actual para el folio {}",
@@ -94,12 +88,6 @@ public class BoletaService {
         if (boletaExistente == null || !boletaExistente.getFolioBoleta().equals(folio)) {
             log.error("No se encontró boleta con folio {} para actualizar", folio);
             throw new RecursoNoEncontradoException("Número de folio incorrecto.");
-        }
-
-        // Regla de negocio: debe tener productos
-        if (boletaDTO.getProductos() == null || boletaDTO.getProductos().isEmpty()) {
-            log.error("Validación fallida: intento de actualizar folio {} sin productos", folio);
-            throw new IllegalStateException("No se puede actualizar boleta sin productos");
         }
 
         // Regla de negocio: fecha no futura
