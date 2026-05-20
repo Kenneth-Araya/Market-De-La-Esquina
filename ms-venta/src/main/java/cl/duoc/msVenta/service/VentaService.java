@@ -1,5 +1,6 @@
 package cl.duoc.msVenta.service;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -162,6 +163,12 @@ public class VentaService {
             throw new IllegalArgumentException("El folio de la boleta no puede ser nulo o vacío");
         }
 
+        // Regla de negocio: fecha no futura
+        if (boletaDTO.getFecha() != null && boletaDTO.getFecha().isAfter(LocalDate.now())) {
+            log.error("Validación fallida: la fecha {} es futura para el folio {}", boletaDTO.getFecha(), boletaDTO.getFolio());
+            throw new IllegalArgumentException("La fecha de emision no puede ser una fecha futura");
+        }
+
         BoletaVentaDTO creada = boletaClient.crearBoleta(boletaDTO);
         log.info("Boleta con folio {} creada exitosamente en ms-boleta", creada.getFolio());
         return creada;
@@ -173,6 +180,12 @@ public class VentaService {
 
         if (folio == null || folio.isBlank()) {
             throw new IllegalArgumentException("El folio no puede ser nulo o vacío");
+        }
+
+        // Regla de negocio: fecha no futura
+        if (boletaDTO.getFecha() != null && boletaDTO.getFecha().isAfter(LocalDate.now())) {
+            log.error("Validación fallida: la fecha {} es futura para el folio {}", boletaDTO.getFecha(), folio);
+            throw new IllegalArgumentException("La fecha de emision no puede ser una fecha futura");
         }
 
         BoletaVentaDTO actualizada = boletaClient.actualizarBoleta(folio, boletaDTO);

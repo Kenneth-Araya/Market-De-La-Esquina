@@ -82,7 +82,7 @@ public class VentaController {
 
     //Crear una boleta
     @PostMapping("/boletas")
-    public ResponseEntity<BoletaVentaDTO> crearBoleta(@RequestBody BoletaVentaDTO boletaDTO) {
+    public ResponseEntity<BoletaVentaDTO> crearBoleta(@RequestBody BoletaVentaDTO boletaDTO, @PathVariable String folio) {
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(ventaService.crearBoletaParaVenta(boletaDTO));
     }
