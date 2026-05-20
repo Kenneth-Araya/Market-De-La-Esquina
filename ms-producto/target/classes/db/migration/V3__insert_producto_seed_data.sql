@@ -7,3 +7,5 @@ VALUES
 ('7804443332220', 'Tallarines Lucchetti', 'Paquete 400g N5. Pasta de sémola de trigos duros, aporta energía y queda al dente en pocos minutos.', 990, 2),
 ('7801112223334', 'Té Supremo', 'Caja 20 bolsitas. Té negro Ceylán selección especial, destaca por su aroma intenso y color dorado.', 1150, 3)
 ON CONFLICT (codigo_barra) DO NOTHING;
+-- PARCHE: Sincroniza la secuencia del ID autoincremental después de la inserción forzada
+SELECT setval(pg_get_serial_sequence('bd_productos.producto', 'id'), COALESCE(max(id), 1)) FROM bd_productos.producto;

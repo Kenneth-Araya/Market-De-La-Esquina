@@ -1,12 +1,15 @@
 package cl.duoc.ms_inventario.service;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.stream.Collectors;
+
 import org.springframework.stereotype.Service;
 
 import cl.duoc.ms_inventario.clients.ProductoClient;
 import cl.duoc.ms_inventario.dto.InventarioDTO;
 import cl.duoc.ms_inventario.dto.InventarioMapper;
 import cl.duoc.ms_inventario.dto.ProductoResponseDTO;
+import cl.duoc.ms_inventario.exception.RecursoNoEncontradoException;
 import cl.duoc.ms_inventario.model.Inventario;
 import cl.duoc.ms_inventario.repository.InventarioRepository;
 import jakarta.transaction.Transactional;
@@ -24,8 +27,8 @@ public class InventarioService {
     public InventarioDTO validarObteniendoStock(Long idProducto){
         log.info("Iniciando validacion de stock para el producto: {}",idProducto);
         // 1. Buscamos la entidad en la base de datos
-        Inventario inventario=repo.findById(idProducto)
-                .orElseThrow(()-> new RuntimeException("El producto no existe en el inventario"));
+        Inventario inventario=repo.findByIdProducto(idProducto)
+                .orElseThrow(()-> new RecursoNoEncontradoException("El producto no existe en el inventario"));
         
         // 2. Usamos el Mapper para convertir la Entidad a DTO
         InventarioDTO dto=mapper.toDTO(inventario);
@@ -59,8 +62,8 @@ public class InventarioService {
     public void descontarStock(Long idProducto, int cantidad){
         log.info("procesando salida de {} unidades para el producto {} ", cantidad, idProducto);
 
-        Inventario inv=repo.findById(idProducto)
-                .orElseThrow(()->new RuntimeException("NO SE PUEDE DESCONTAR: PRODUCTO NO ENCONTRADO"));
+        Inventario inv=repo.findByIdProducto(idProducto)
+                .orElseThrow(()->new RecursoNoEncontradoException("NO SE PUEDE DESCONTAR: PRODUCTO NO ENCONTRADO"));
         if (inv.getStockActual()<cantidad){
             log.error("Falla en salida: Stock insuficiente para el producto {} ",idProducto);
             throw new RuntimeException("Stock insuficiente para realizar la venta");
@@ -71,25 +74,30 @@ public class InventarioService {
 
     }
 
-    public List<InventarioDTO>listarVencidos(){
-        log.info("generando reporte de los productos que ya estan vencidos");
-        return repo.findAll().stream()
-            .filter(i -> i.getFechaVencimiento() != null && i.getFechaVencimiento().isBefore(LocalDate.now()))
-            .map(i -> {
-                InventarioDTO dto = mapper.toDTO(i);
-                dto.setEstadoProducto("BLOQUEADO - VENCIDO"); // ‹- Se lo asignamos en el vuelo
-                return dto;
-            })
-            .toList();
-    }  
     
-    public List<InventarioDTO>listarBajoStock(int limite){
+    public List<InventarioDTO>listarProductosBajoStock(int limite){
         log.info("Buscando productos con un stock menor a {} ",limite);
-        return repo.findAll().stream()
-        .filter(i->i.getStockActual()<=limite)
-        .map(mapper::toDTO)
-        .toList();
-        }
+        // 1. Traemos todo y filtramos en memoria por el límite dinámico
+        List<InventarioDTO> listaDtos = repo.findAll().stream()
+                .filter(i -> i.getStockActual() <= limite)
+                .map(mapper::toDTO)
+                .collect(Collectors.toList());
+
+        listaDtos.forEach(dto -> {
+            try {
+                ProductoResponseDTO productoDto = productoClient.obtenerProductoPorId(dto.getIdProducto());
+                if (productoDto != null) {
+                    dto.setNombreProducto(productoDto.getNombre());
+                }
+            } catch (Exception e) {
+                log.error("Error Feign al traer nombre para el producto ID {}: {}", dto.getIdProducto(), e.getMessage());
+                dto.setNombreProducto("Nombre no disponible");
+            }
+        });
+
+        return listaDtos;
+    }
+        
       
     
     /*POSTERIORMENTE CUANDO SE IMPLEMENTE EL MICROSERVICIO PROVEEDOR 
