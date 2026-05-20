@@ -9,6 +9,6 @@ import cl.duoc.msVenta.model.Venta;
 public interface VentaRepository extends JpaRepository<Venta, Long> {
     
     Optional<Venta> findByIdVenta(Long idVenta);
-
+    
     void deleteByIdVenta(Long idVenta);
 }

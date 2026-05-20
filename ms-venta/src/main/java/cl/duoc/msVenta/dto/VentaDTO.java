@@ -38,4 +38,8 @@ public class VentaDTO {
 
     @NotBlank(message = "El código de transacción es obligatorio")
     private String codigoTransaccionVentaDto;
+
+    //referencia a producto
+    @NotNull(message = "La boleta debe contener al menos un producto")
+    private java.util.List<String> productos;
 }

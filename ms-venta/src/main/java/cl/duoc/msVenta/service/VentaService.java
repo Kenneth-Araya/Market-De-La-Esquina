@@ -6,20 +6,24 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import cl.duoc.msVenta.dto.VentaDTO;
 import cl.duoc.msVenta.dto.VentaDTOMapper;
+import cl.duoc.msVenta.exeptions.RecursoNoEncontradoException;
 import cl.duoc.msVenta.model.Venta;
 import cl.duoc.msVenta.repository.VentaRepository;
+import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
 @Transactional
 public class VentaService {
-    
+
     @Autowired
     private VentaRepository ventaRepository;
 
-    //Listar ventas
-    public List<VentaDTO> listarTodos(){
+    // Listar ventas
+    public List<VentaDTO> listarTodos() {
         log.info("Iniciando consulta para listar todas las ventas");
 
         List<Venta> ventas = ventaRepository.findAll();
@@ -30,45 +34,49 @@ public class VentaService {
                 ventaDTOs.add(VentaDTOMapper.toDto(venta));
             }
             log.info("Se encontraron {} venta(s)", ventas.size());
-        } else{
+        } else {
             log.warn("No se encontraron ventas en el sistema");
         }
+        return ventaDTOs;
     }
 
-    //Guardar ventas
-    public VentaDTO guardarVenta(VentaDTO ventaDTO){
-        
+    // Guardar ventas
+    public VentaDTO guardarVenta(VentaDTO ventaDTO) {
+
         log.info("Iniciando proceso de guardado de venta");
 
-        //regla de negocio: debe tener producto
-        if (ventaDTo.getProductos() == null || ventaDTO.getProductos().isEmpty()) {
-            log.error("Validación fallida: la venta con codigo transaccion venta {} no tiene productos asosciados", ventaDTO.getCodigoTransaccionVentaDto());
+        // regla de negocio: debe tener producto
+        if (ventaDTO.getProductos() == null || ventaDTO.getProductos().isEmpty()) {
+            log.error("Validación fallida: la venta con codigo transaccion venta {} no tiene productos asosciados",
+                    ventaDTO.getCodigoTransaccionVentaDto());
             throw new IllegalArgumentException("No se puede generar venta sin producto");
         }
 
-        //regla de negocio: no puede ser nula 
-        if (ventaDTO == null || ventaDTO.getCodigoTransaccionVentaDto() == null || ventaDTO.getCodigoTransaccionVentaDto().isEmpty()) {
+        // regla de negocio: no puede ser nula
+        if (ventaDTO == null || ventaDTO.getCodigoTransaccionVentaDto() == null
+                || ventaDTO.getCodigoTransaccionVentaDto().isEmpty()) {
             log.error("Validación fallida: la venta o codigo de transaccion son nulos o vacíos");
-            throw IllegalArgumentException("La venta o su codigo de transaccion no pueden ser nulos o vacios");
+            throw new IllegalArgumentException("La venta o su codigo de transaccion no pueden ser nulos o vacios");
         }
 
         Venta venta = VentaDTOMapper.toEntity(ventaDTO);
         Venta guardado = ventaRepository.save(venta);
 
-        if (guardado) {
+        if (guardado != null) {
             log.info("Venta con codigo de transaccion {} guarda exitosamente", ventaDTO.getCodigoTransaccionVentaDto());
-        }else{
-            log.warn("No se pudo guardar la venta con codigo de transaccion {}", ventaDTO.getCodigoTransaccionVentaDto());
+        } else {
+            log.warn("No se pudo guardar la venta con codigo de transaccion {}",
+                    ventaDTO.getCodigoTransaccionVentaDto());
         }
-
         return VentaDTOMapper.toDto(guardado);
     }
 
-    //Eliminar ventas
-    public boolean eliminarPorId(Long idVenta){
+    // Eliminar ventas
+    public boolean eliminarPorId(Long idVenta) {
         log.info("Iniciando proceso de eliminación para la venta con id: {}", idVenta);
-        
-        Venta ventaExistente = ventaRepository.findByIdVenta(idVenta);
+
+        Venta ventaExistente = ventaRepository.findByIdVenta(idVenta)
+                .orElseThrow(() -> new RecursoNoEncontradoException("Venta no encontrada con id: " + idVenta));
 
         if (ventaExistente == null || !ventaExistente.getIdVenta().equals(idVenta)) {
             log.error("No se encontró venta con id {} para eliminar", idVenta);
@@ -81,42 +89,40 @@ public class VentaService {
 
     }
 
-    //Actualizar ventas
-    public VentaDTO actualizarVenta(Long id, VentaDTO ventaDTO){
-        log.info("Iniciando proceso de actualización para venta con codigo de transaccion");
+    public VentaDTO actualizarVenta(Long idVenta, VentaDTO ventaDTO) {
+        log.info("Iniciando proceso de actualización para venta con id: {}", idVenta);
 
-        Venta ventaExistente = ventaRepository.findByIdVenta(id);
-
-        //regla de negocio: debe tener producto
-        if (ventaDTo.getProductos() == null || ventaDTO.getProductos().isEmpty()) {
-            log.error("Validación fallida: la venta con codigo transaccion venta {} no tiene productos asosciados", ventaDTO.getCodigoTransaccionVentaDto());
-            throw new IllegalArgumentException("No se puede generar venta sin producto");
-        }
-
-        //regla de negocio: no puede ser nula 
-        if (ventaDTO == null || ventaDTO.getCodigoTransaccionVentaDto() == null || ventaDTO.getCodigoTransaccionVentaDto().isEmpty()) {
+        // regla de negocio: codigo de transaccion no puede ser nulo
+        if (ventaDTO == null || ventaDTO.getCodigoTransaccionVentaDto() == null
+                || ventaDTO.getCodigoTransaccionVentaDto().isEmpty()) {
             log.error("Validación fallida: la venta o codigo de transaccion son nulos o vacíos");
-            throw IllegalArgumentException("La venta o su codigo de transaccion no pueden ser nulos o vacios");
+            throw new IllegalArgumentException("La venta o su codigo de transaccion no pueden ser nulos o vacios");
         }
+
+        // regla de negocio: debe tener productos
+        if (ventaDTO.getProductos() == null || ventaDTO.getProductos().isEmpty()) {
+            log.error("Validación fallida: la venta con codigo {} no tiene productos asociados",
+                    ventaDTO.getCodigoTransaccionVentaDto());
+            throw new IllegalArgumentException("No se puede actualizar una venta sin productos");
+        }
+
+        Venta ventaExistente = ventaRepository.findByIdVenta(idVenta)
+                .orElseThrow(() -> new RecursoNoEncontradoException("Venta no encontrada con id: " + idVenta));
 
         Venta ventaActualizada = VentaDTOMapper.toEntity(ventaDTO);
         ventaActualizada.setIdVenta(ventaExistente.getIdVenta());
-        boolean actualizado = ventaRepository.save(ventaActualizada) != null;
+        Venta guardado = ventaRepository.save(ventaActualizada);
 
-        if (guardado) {
-            log.info("Venta con codigo de transaccion {} guarda exitosamente", ventaDTO.getCodigoTransaccionVentaDto());
-        }else{
-            log.warn("No se pudo guardar la venta con codigo de transaccion {}", ventaDTO.getCodigoTransaccionVentaDto());
-        }
+        log.info("Venta con codigo de transaccion {} actualizada exitosamente",
+                ventaDTO.getCodigoTransaccionVentaDto());
 
-        return actualizado;
-        
+        return VentaDTOMapper.toDto(guardado);
     }
 
-    //buscar venta por id 
-    public VentaDTO findById(Long id){
+    // buscar venta por id
+    public VentaDTO findById(Long id) {
         Venta venta = ventaRepository.findById(id)
-        .orElseThrow(() -> new RuntimeException("Venta no encontrada con ID: " + id));
+                .orElseThrow(() -> new RuntimeException("Venta no encontrada con ID: " + id));
         return VentaDTOMapper.toDto(venta);
     }
 }

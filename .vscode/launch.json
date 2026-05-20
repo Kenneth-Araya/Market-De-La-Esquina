@@ -1,0 +1,28 @@
+{
+    "configurations": [
+        {
+            "type": "java",
+            "name": "SistemaMarketApplication",
+            "request": "launch",
+            "mainClass": "cl.duoc.sistemaMarket.SistemaMarketApplication",
+            "projectName": ""
+        },
+        {
+            "type": "java",
+            "name": "SistemaMarketApplication",
+            "request": "launch",
+            "mainClass": "cl.duoc.msVenta.SistemaMarketApplication",
+            "projectName": ""
+        },
+        {
+            "type": "java",
+            "name": "Spring Boot-SistemaMarketApplication<cl.duoc-sistemaMarket>",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "mainClass": "cl.duoc.sistemaMarket.SistemaMarketApplication",
+            "projectName": "cl.duoc-sistemaMarket",
+            "args": "",
+            "envFile": "${workspaceFolder}/.env"
+        }
+    ]
+}

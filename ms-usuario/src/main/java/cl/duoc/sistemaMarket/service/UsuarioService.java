@@ -4,11 +4,14 @@ import java.util.ArrayList;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import cl.duoc.msVenta.model.Venta;
 import cl.duoc.sistemaMarket.dto.UsuarioDTO;
 import cl.duoc.sistemaMarket.dto.UsuarioDTOMapper;
+import cl.duoc.sistemaMarket.exeptions.RecursoNoEncontradoException;
 import cl.duoc.sistemaMarket.model.Usuario;
 import cl.duoc.sistemaMarket.repository.UsuarioRepository;
+import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Service
@@ -28,7 +31,7 @@ public class UsuarioService {
 
         if (!usuarios.isEmpty()) {
             for (Usuario usuario : usuarios) {
-                usuarioDTOs.add(UsuarioDTOMapper.toDTO(usuario));
+                usuarioDTOs.add(UsuarioDTOMapper.toDto(usuario));
             }
             log.info("Se encontraron {} usuario(s)", usuarios.size());
         } else {
@@ -62,7 +65,7 @@ public class UsuarioService {
             throw new IllegalArgumentException("El correo debe contener '@' (ej: usuario@correo.com). Valor recibido: " + correo);
         }
 
-        Usuario usuario = UsuarioDTOMapper.toModel(usuarioDTO);
+        Usuario usuario = UsuarioDTOMapper.toEntity(usuarioDTO);
         Usuario guardado = usuarioRepository.save(usuario);
 
         if (guardado != null) {
@@ -71,7 +74,7 @@ public class UsuarioService {
             log.warn("No se pudo guardar usuario con rut {}", usuarioDTO.getRutUsuarioDto());
         }
 
-        return UsuarioDTOMapper.toDTO(guardado);
+        return UsuarioDTOMapper.toDto(guardado);
     }
 
     // Eliminar usuarios
@@ -93,7 +96,7 @@ public class UsuarioService {
         }
 
         log.info("Usuario con id {} encontrado exitosamente", id);
-        return UsuarioDTOMapper.toDTO(usuario);
+        return UsuarioDTOMapper.toDto(usuario);
     }
 
     // Actualizar usuarios
@@ -127,6 +130,6 @@ public class UsuarioService {
         Usuario actualizado = usuarioRepository.save(usuario);
         log.info("Usuario con id {} actualizado exitosamente", id);
 
-        return UsuarioDTOMapper.toDTO(actualizado);
+        return UsuarioDTOMapper.toDto(actualizado);
     }
 }

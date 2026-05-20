@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
 import cl.duoc.sistemaMarket.dto.BoletaVentaDTO;
 
-@FeignClient(name = "boletas-service", url = "http://localhost:8083")
+@FeignClient(name = "boletas-service", url = "http://localhost:8083/api/v1/ventas")
 public interface BoletaClient {
 
     @GetMapping("/boletas/{folio}")

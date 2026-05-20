@@ -11,7 +11,6 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
 import cl.duoc.msVenta.dto.VentaDTO;
 import cl.duoc.msVenta.service.VentaService;
 import jakarta.validation.Valid;
