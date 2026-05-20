@@ -23,6 +23,56 @@
             "projectName": "cl.duoc-sistemaMarket",
             "args": "",
             "envFile": "${workspaceFolder}/.env"
+        },
+        {
+            "type": "java",
+            "name": "Spring Boot-SistemaMarketApplication<ms-boleta>",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "mainClass": "cl.duoc.sistemaMarket.SistemaMarketApplication",
+            "projectName": "ms-boleta",
+            "args": "",
+            "envFile": "${workspaceFolder}/.env"
+        },
+        {
+            "type": "java",
+            "name": "Spring Boot-MsInventarioApplication<ms-inventario>",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "mainClass": "cl.duoc.ms_inventario.MsInventarioApplication",
+            "projectName": "ms-inventario",
+            "args": "",
+            "envFile": "${workspaceFolder}/.env"
+        },
+        {
+            "type": "java",
+            "name": "Spring Boot-MsProductoApplication<ms-producto>",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "mainClass": "cl.duoc.ms_producto.MsProductoApplication",
+            "projectName": "ms-producto",
+            "args": "",
+            "envFile": "${workspaceFolder}/.env"
+        },
+        {
+            "type": "java",
+            "name": "Spring Boot-SistemaMarketApplication<ms-usuario>",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "mainClass": "cl.duoc.sistemaMarket.SistemaMarketApplication",
+            "projectName": "ms-usuario",
+            "args": "",
+            "envFile": "${workspaceFolder}/.env"
+        },
+        {
+            "type": "java",
+            "name": "Spring Boot-SistemaMarketApplication<ms-venta>",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "mainClass": "cl.duoc.msVenta.SistemaMarketApplication",
+            "projectName": "ms-venta",
+            "args": "",
+            "envFile": "${workspaceFolder}/.env"
         }
     ]
 }
