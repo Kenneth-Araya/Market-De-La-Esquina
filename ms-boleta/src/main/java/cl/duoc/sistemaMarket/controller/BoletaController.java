@@ -30,12 +30,10 @@ public class BoletaController {
         .ok(boletaDTOs);
     }
 
-    //Crear boleta
     @PostMapping()
     public ResponseEntity<BoletaDTO> guardarBoleta(@Valid @RequestBody BoletaDTO boletaDTO) {
-        boletaService.guardarBoleta(boletaDTO);
-        return ResponseEntity
-        .ok(boletaDTO);
+        BoletaDTO guardado = boletaService.guardarBoleta(boletaDTO);
+        return ResponseEntity.ok(guardado);
     }
 
     //Eliminar boleta

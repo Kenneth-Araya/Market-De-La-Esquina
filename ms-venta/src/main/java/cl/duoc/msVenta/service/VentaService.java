@@ -4,6 +4,9 @@ import java.util.ArrayList;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import cl.duoc.msVenta.Client.BoletaClient;
+import cl.duoc.msVenta.dto.BoletaVentaDTO;
 import cl.duoc.msVenta.dto.VentaDTO;
 import cl.duoc.msVenta.dto.VentaDTOMapper;
 import cl.duoc.msVenta.exeptions.RecursoNoEncontradoException;
@@ -21,6 +24,7 @@ public class VentaService {
 
     @Autowired
     private VentaRepository ventaRepository;
+    private final BoletaClient boletaClient;
 
     // Listar ventas
     public List<VentaDTO> listarTodos() {
@@ -119,10 +123,72 @@ public class VentaService {
         return VentaDTOMapper.toDto(guardado);
     }
 
+
+
+    //====================================feign====================================
+    
     // buscar venta por id
     public VentaDTO findById(Long id) {
         Venta venta = ventaRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Venta no encontrada con ID: " + id));
         return VentaDTOMapper.toDto(venta);
+    }
+
+    public List<BoletaVentaDTO> listarBoletas() {
+        log.info("Consultando todas las boletas en ms-boleta");
+        List<BoletaVentaDTO> boletas = boletaClient.listarBoletas();
+        log.info("Se obtuvieron {} boleta(s) desde ms-boleta", boletas.size());
+        return boletas;
+    }
+
+    //obtener boleta por folio
+    public BoletaVentaDTO obtenerBoletaPorFolio(String folio) {
+        log.info("Consultando boleta con folio {} en ms-boleta", folio);
+
+        if (folio == null || folio.isBlank()) {
+            throw new IllegalArgumentException("El folio no puede ser nulo o vacío");
+        }
+
+        BoletaVentaDTO boleta = boletaClient.obtenerBoletaPorFolio(folio);
+        log.info("Boleta con folio {} obtenida exitosamente desde ms-boleta", folio);
+        return boleta;
+    }
+
+    //crear boleta para venta
+    public BoletaVentaDTO crearBoletaParaVenta(BoletaVentaDTO boletaDTO) {
+        log.info("Creando boleta en ms-boleta para venta con folio {}", boletaDTO.getFolio());
+
+        if (boletaDTO.getFolio() == null || boletaDTO.getFolio().isBlank()) {
+            throw new IllegalArgumentException("El folio de la boleta no puede ser nulo o vacío");
+        }
+
+        BoletaVentaDTO creada = boletaClient.crearBoleta(boletaDTO);
+        log.info("Boleta con folio {} creada exitosamente en ms-boleta", creada.getFolio());
+        return creada;
+    }
+
+    //actualizar datos (pagada)
+    public BoletaVentaDTO actualizarEstadoBoleta(String folio, BoletaVentaDTO boletaDTO) {
+        log.info("Actualizando boleta con folio {} en ms-boleta", folio);
+
+        if (folio == null || folio.isBlank()) {
+            throw new IllegalArgumentException("El folio no puede ser nulo o vacío");
+        }
+
+        BoletaVentaDTO actualizada = boletaClient.actualizarBoleta(folio, boletaDTO);
+        log.info("Boleta con folio {} actualizada a estado {} en ms-boleta", folio, actualizada.getEstado());
+        return actualizada;
+    }
+
+    //eliminar boleta
+    public void eliminarBoletaDeVenta(String folio) {
+        log.info("Eliminando boleta con folio {} en ms-boleta", folio);
+
+        if (folio == null || folio.isBlank()) {
+            throw new IllegalArgumentException("El folio no puede ser nulo o vacío");
+        }
+
+        boletaClient.eliminarBoleta(folio);
+        log.info("Boleta con folio {} eliminada exitosamente en ms-boleta", folio);
     }
 }

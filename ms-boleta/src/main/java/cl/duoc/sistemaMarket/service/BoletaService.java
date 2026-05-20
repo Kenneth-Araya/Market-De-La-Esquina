@@ -57,7 +57,7 @@ public class BoletaService {
     }
 
     // Guardar boleta
-    public boolean guardarBoleta(BoletaDTO boletaDTO) {
+    public BoletaDTO  guardarBoleta(BoletaDTO boletaDTO) {
         log.info("Iniciando proceso de guardado de boleta");
 
         // Regla de negocio: folio no nulo ni vacío
@@ -80,15 +80,9 @@ public class BoletaService {
         }
 
         Boleta boleta = boletaDTOMapper.toModel(boletaDTO);
-        boolean guardado = boletaRepository.save(boleta) != null;
-
-        if (guardado) {
-            log.info("Boleta con folio {} guardada exitosamente", boletaDTO.getFolio());
-        } else {
-            log.warn("No se pudo guardar la boleta con folio {}", boletaDTO.getFolio());
-        }
-
-        return guardado;
+        Boleta guardado = boletaRepository.save(boleta);
+        log.info("Boleta con folio {} guardada exitosamente", boletaDTO.getFolio());
+        return boletaDTOMapper.toDTO(guardado);
     }
 
     // Actualizar boleta
