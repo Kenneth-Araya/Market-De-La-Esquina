@@ -97,11 +97,34 @@ public class InventarioService {
 
         return listaDtos;
     }
+
+    public List<InventarioDTO> listarTodo() {
+        log.info("Buscando todo el inventario registrado");
+        
+        // 1. Traemos todo de la BD y lo pasamos a DTO
+        List<InventarioDTO> listaDtos = repo.findAll().stream()
+                .map(mapper::toDTO)
+                .collect(Collectors.toList());
+
+        // 2. Iteramos para ir a buscar el nombre de cada producto a ms-producto
+        listaDtos.forEach(dto -> {
+            try {
+                ProductoResponseDTO productoDto = productoClient.obtenerProductoPorId(dto.getIdProducto());
+                if (productoDto != null) {
+                    dto.setNombreProducto(productoDto.getNombre());
+                }
+            } catch (Exception e) {
+                log.error("Error Feign al traer nombre para el producto ID {}: {}", dto.getIdProducto(), e.getMessage());
+                dto.setNombreProducto("Nombre no disponible");
+            }
+        });
+
+        return listaDtos;
+    }
         
       
     
-    /*POSTERIORMENTE CUANDO SE IMPLEMENTE EL MICROSERVICIO PROVEEDOR 
-      SE AGREGARAN MAS METODOS RELEVANTES COMO AGREGAR STOCK */
+    
 
 
 

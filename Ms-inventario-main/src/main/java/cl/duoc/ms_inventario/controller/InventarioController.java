@@ -23,6 +23,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 public class InventarioController {
     private final InventarioService service;
 
+
+
     // 1. Consultar estado y stock (Para ver si es apto para venta)
     @GetMapping("/{id}")
     public ResponseEntity<InventarioDTO> consultarStock(@PathVariable Long id) {
@@ -36,14 +38,24 @@ public class InventarioController {
         return ResponseEntity.ok("Stock actualizado: se descontaron"+ cantidad + " unidades ");
     }
 
-    // 4. Reporte de stock bajo (Ejemplo: limite = 5)
+    // 3. Reporte de stock bajo (Ejemplo: limite = 5)
     @GetMapping("/bajo/{limite}")
     public ResponseEntity<List<InventarioDTO>> listarBajoStock(@PathVariable int limite) {
         return ResponseEntity.ok(service.listarProductosBajoStock(limite));
     }
+
+    //4. listar todos 
+    @GetMapping
+    public ResponseEntity<List<InventarioDTO>> listarTodo() {
+        List<InventarioDTO> inventario = service.listarTodo();
+        
+        // Si la lista está vacía, devolvemos un 204 No Content, si tiene datos, un 200 OK
+        if (inventario.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        }
+        return ResponseEntity.ok(inventario);
+    }
     
-    //PARA LA SIGUIENTE ENTREGA SE IMPLEMENTARA EL AGREGAR 
-    // STOCK DEBIDO A QUE AUN NO HAY UN MICROSERVICIO PROVEEDOR 
 
     
 }
