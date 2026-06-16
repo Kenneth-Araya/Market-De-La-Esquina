@@ -46,7 +46,7 @@ public class ProductoService {
         log.info("Solicitando eliminacion del producto con id: {}",id);
         if (!repo.existsById(id)) {
             log.warn("No se encontro el producto con id: {}",id);
-            throw new IllegalArgumentException("Error al eliminar el producto debido a que no existe el ID: " + id);
+            throw new RecursoNoEncontradoException("No existe el ID: " + id);
         }
 
         repo.deleteById(id);
