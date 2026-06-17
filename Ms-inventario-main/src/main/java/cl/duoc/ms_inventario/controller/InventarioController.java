@@ -1,14 +1,10 @@
 package cl.duoc.ms_inventario.controller;
-
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
 import cl.duoc.ms_inventario.dto.InventarioDTO;
 import cl.duoc.ms_inventario.service.InventarioService;
 import lombok.RequiredArgsConstructor;
-
 import java.util.List;
-
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -23,8 +19,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 public class InventarioController {
     private final InventarioService service;
 
-
-
     // 1. Consultar estado y stock (Para ver si es apto para venta)
     @GetMapping("/{id}")
     public ResponseEntity<InventarioDTO> consultarStock(@PathVariable Long id) {
@@ -32,10 +26,10 @@ public class InventarioController {
     }
 
     // 2. Descontar stock 
-    @PostMapping("/{id}")
+    @PostMapping("/{id}/descontar")
     public ResponseEntity<String> descontarStock(@PathVariable Long id, @RequestParam int cantidad) {
         service.descontarStock(id, cantidad);
-        return ResponseEntity.ok("Stock actualizado: se descontaron"+ cantidad + " unidades ");
+        return ResponseEntity.ok("Stock actualizado: se descontaron " + cantidad + " unidades");
     }
 
     // 3. Reporte de stock bajo (Ejemplo: limite = 5)
@@ -45,17 +39,18 @@ public class InventarioController {
     }
 
     //4. listar todos 
-    @GetMapping
+    @GetMapping("")
     public ResponseEntity<List<InventarioDTO>> listarTodo() {
-        List<InventarioDTO> inventario = service.listarTodo();
-        
-        // Si la lista está vacía, devolvemos un 204 No Content, si tiene datos, un 200 OK
-        if (inventario.isEmpty()) {
-            return ResponseEntity.noContent().build();
-        }
-        return ResponseEntity.ok(inventario);
+        return ResponseEntity.ok(service.listarTodo());
+
+    }
+
+    // 5. Agregar stock 
+    @PostMapping("/{id}/agregar")
+    public ResponseEntity<String> agregarStock(@PathVariable Long id, @RequestParam int cantidad) {
+        service.agregarStock(id, cantidad);
+        return ResponseEntity.ok("Stock actualizado: se agregaron " + cantidad + " unidades");
     }
     
 
-    
 }
