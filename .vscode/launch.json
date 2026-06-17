@@ -2,6 +2,20 @@
     "configurations": [
         {
             "type": "java",
+            "name": "MsEurekaApplication",
+            "request": "launch",
+            "mainClass": "cl.duoc.ms_eureka.MsEurekaApplication",
+            "projectName": ""
+        },
+        {
+            "type": "java",
+            "name": "MsEurekaApplication",
+            "request": "launch",
+            "mainClass": "cl.duoc.ms_eureka.MsEurekaApplication",
+            "projectName": "ms_eureka"
+        },
+        {
+            "type": "java",
             "name": "SistemaMarketApplication",
             "request": "launch",
             "mainClass": "cl.duoc.sistemaMarket.SistemaMarketApplication",
