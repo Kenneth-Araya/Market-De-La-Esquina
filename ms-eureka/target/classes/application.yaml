@@ -1,0 +1,12 @@
+# application yaml
+server:
+  port: 8761
+
+spring:
+  application:
+    name: eureka-server
+
+eureka:
+  client:
+    register-with-eureka: false #Usamos esto para que el servidor no se registre a sí mismo
+    fetch-registry: false
