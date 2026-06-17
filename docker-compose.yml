@@ -1,6 +1,8 @@
 services:
 
   eureka-server:
+    build:
+      context: ./ms-eureka
     image: eureka-server:latest
     container_name: eureka-server
     ports:
@@ -9,6 +11,8 @@ services:
       - ms-network
 
   api-gateway:
+    build:
+      context: ./ms-gateway
     image: api-gateway:latest
     container_name: api-gateway
     ports:
@@ -33,6 +37,8 @@ services:
       - ms-network
 
   ms-boletas:
+    build:
+      context: ./ms-boleta
     image: ms-boletas:latest
     container_name: ms-boletas
     ports:
@@ -45,6 +51,8 @@ services:
       - ms-network
 
   ms-usuarios:
+    build:
+      context: ./ms-usuario
     image: ms-usuarios:latest
     container_name: ms-usuarios
     ports:
