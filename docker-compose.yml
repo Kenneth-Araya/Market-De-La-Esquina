@@ -1,0 +1,61 @@
+services:
+
+  eureka-server:
+    image: eureka-server:latest
+    container_name: eureka-server
+    ports:
+      - "8761:8761"
+    networks:
+      - ms-network
+
+  api-gateway:
+    image: api-gateway:latest
+    container_name: api-gateway
+    ports:
+      - "8080:8080"
+    depends_on:
+      - eureka-server
+    environment:
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka
+    networks:
+      - ms-network
+
+  ms-venta:
+    image: ms-venta:latest
+    container_name: ms-venta
+    ports:
+      - "8083:8083"
+    depends_on:
+      - eureka-server
+    environment:
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka
+    networks:
+      - ms-network
+
+  ms-boletas:
+    image: ms-boletas:latest
+    container_name: ms-boletas
+    ports:
+      - "8081:8081"
+    depends_on:
+      - eureka-server
+    environment:
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka
+    networks:
+      - ms-network
+
+  ms-usuarios:
+    image: ms-usuarios:latest
+    container_name: ms-usuarios
+    ports:
+      - "8082:8082"
+    depends_on:
+      - eureka-server
+    environment:
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka
+    networks:
+      - ms-network
+
+networks:
+  ms-network:
+    driver: bridge
