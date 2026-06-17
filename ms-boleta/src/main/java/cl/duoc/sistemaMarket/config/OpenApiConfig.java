@@ -1,4 +1,4 @@
-package cl.duoc.ms_producto.config;
+package cl.duoc.sistemaMarket.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -12,8 +12,8 @@ public class OpenApiConfig {
     public OpenAPI customOpenAPI(){
         return new OpenAPI()
                 .info(new Info()
-                .title("API DE PRODUCTOS - MARKET DE LA ESQUINA")
+                .title("API DE VENTAS - MARKET DE LA ESQUINA")
                 .version("1.0")
-                .description("Documentación oficial para la gestión de productos"));
+                .description("Documentación oficial para la gestión de ventas"));
     }
 }
