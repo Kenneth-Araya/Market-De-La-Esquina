@@ -14,5 +14,5 @@ public interface UsuarioRepository extends JpaRepository<Usuario, Integer> {
 
     List<Usuario> findAllByOrderByIdAsc();
 
-    boolean existsByNombre(String nombreUsuario);
+    boolean existsByNombreUsuario(String nombreUsuario);
 }

@@ -9,5 +9,4 @@ public class SistemaMarketApplication {
 	public static void main(String[] args) {
 		SpringApplication.run(SistemaMarketApplication.class, args);
 	}
-
 }

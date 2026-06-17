@@ -45,6 +45,6 @@ public class Boleta {
     private String estadoBoleta;
 
     // ManyToOne: muchas boletas pertenecen a una venta
-    @Column(name = "id_venta", nullable = false)
-    private Long idVenta;
+    //@Column(name = "id_venta", nullable = false)
+    //private Long idVenta;
 }

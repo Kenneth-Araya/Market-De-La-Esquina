@@ -15,5 +15,5 @@ public interface BoletaRepository extends JpaRepository<Boleta, Long> {
 
     List<Boleta> findAllByOrderByIdAsc();
 
-    boolean existsByFolio(String folioBoleta);
+    boolean existsByFolioBoleta(String folioBoleta);
 }

@@ -51,7 +51,7 @@ public class UsuarioServiceTest {
         UsuarioDTO usuariodto = new UsuarioDTO();
         usuariodto.setNombreUsuarioDto("Miles Morales");
 
-        when(usuarioRepository.existsByNombre("Miles Morales")).thenReturn(true);
+        when(usuarioRepository.existsByNombreUsuario("Miles Morales")).thenReturn(true);
 
         assertThrows(IllegalArgumentException.class,()->{
             usuarioService.guardarUsuario(usuariodto);
@@ -66,7 +66,7 @@ public class UsuarioServiceTest {
         usuariodto.setNombreUsuarioDto("Homero simpson");
         usuariodto.setRutUsuarioDto("13.321.986-2");
     
-        when(usuarioRepository.existsByNombre("Homero simpson")).thenReturn(false);
+        when(usuarioRepository.existsByNombreUsuario("Homero simpson")).thenReturn(false);
 
         Usuario usuario = new Usuario();
         usuariodto.setNombreUsuarioDto("Homero simpson");
@@ -102,7 +102,7 @@ public class UsuarioServiceTest {
     //test unitario eliminar usuarios con condicion
     @Test
     void eliminarUsuarioNoExistente(){
-        when(usuarioRepository.existsByNombre("Peter Parker")).thenReturn(false);
+        when(usuarioRepository.existsByNombreUsuario("Peter Parker")).thenReturn(false);
         
         //When y then 
         assertThrows(IllegalArgumentException.class, ()->{
@@ -171,7 +171,7 @@ public class UsuarioServiceTest {
         usuariodto.setRutUsuarioDto("11.431.921-7");
         
         when(usuarioRepository.findById(id)).thenReturn(Optional.of(usuario));
-        when(usuarioRepository.existsByNombre("Nombre Nuevo")).thenReturn(false);
+        when(usuarioRepository.existsByNombreUsuario("Nombre Nuevo")).thenReturn(false);
         when(usuarioRepository.save(any(Usuario.class))).thenReturn(usuario);
 
         //when

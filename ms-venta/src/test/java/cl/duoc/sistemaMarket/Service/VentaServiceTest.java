@@ -34,7 +34,7 @@ public class VentaServiceTest {
         venta.setIdVenta(1L);
         venta.setDescripcionVenta("Compra bebidas y snacks");
 
-        when(ventaRepository.findAllByOrderByIdAsc()).thenReturn(List.of(venta));
+        when(ventaRepository.findAllByOrderByIdVentaAsc()).thenReturn(List.of(venta));
 
         List<VentaDTO>resultado=ventaService.listarTodos();
 
@@ -42,7 +42,7 @@ public class VentaServiceTest {
         assertEquals(1, resultado.size(),"la lista deberia tener minimo una venta");
         assertEquals("Compra bebidas y snacks", resultado.get(0).getDescripcionVentaDto(),"La descripcion no coincide");
 
-        verify(ventaRepository, times(1)).findAllByOrderByIdAsc();
+        verify(ventaRepository, times(1)).findAllByOrderByIdVentaAsc();
     }
 
     //test unitario guardar las ventas
@@ -51,7 +51,7 @@ public class VentaServiceTest {
         VentaDTO ventadto = new VentaDTO();
         ventadto.setDescripcionVentaDto("Ventas de media docena de huevos");
 
-        when(ventaRepository.existsByDescripcion("Ventas de media docena de huevos")).thenReturn(true);
+        when(ventaRepository.existsByDescripcionVenta("Ventas de media docena de huevos")).thenReturn(true);
 
         assertThrows(IllegalArgumentException.class,()->{
             ventaService.guardarVenta(ventadto);
@@ -66,7 +66,7 @@ public class VentaServiceTest {
         ventadto.setDescripcionVentaDto("Ventas de media docena de huevos");
         ventadto.setMontoPagoVentaDto(6000.0);
     
-        when(ventaRepository.existsByDescripcion("Ventas de media docena de huevos")).thenReturn(false);
+        when(ventaRepository.existsByDescripcionVenta("Ventas de media docena de huevos")).thenReturn(false);
 
         Venta venta = new Venta();
         venta.setDescripcionVenta("Ventas de media docena de huevos");
@@ -151,7 +151,7 @@ public class VentaServiceTest {
         ventadto.setDescripcionVentaDto("Descripcion Ocupada");
 
         when(ventaRepository.findById(id)).thenReturn(Optional.of(ventaexistente));
-        when(ventaRepository.existsByDescripcion("Descripcion Ocupada")).thenReturn(true);
+        when(ventaRepository.existsByDescripcionVenta("Descripcion Ocupada")).thenReturn(true);
 
         //when y then
         assertThrows(IllegalArgumentException.class,()->{
@@ -173,7 +173,7 @@ public class VentaServiceTest {
         ventadto.setMontoPagoVentaDto(20000.0);
         
         when(ventaRepository.findById(id)).thenReturn(Optional.of(venta));
-        when(ventaRepository.existsByDescripcion("Descripcion Nuevo")).thenReturn(false);
+        when(ventaRepository.existsByDescripcionVenta("Descripcion Nuevo")).thenReturn(false);
         when(ventaRepository.save(any(Venta.class))).thenReturn(venta);
 
         //when

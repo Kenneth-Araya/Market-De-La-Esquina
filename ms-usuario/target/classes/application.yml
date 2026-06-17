@@ -1,0 +1,52 @@
+spring:
+  application:
+    name: ms-usuario
+  output:
+    ansi:
+      enabled: ALWAYS
+  datasource:
+    url: jdbc:postgresql://aws-1-sa-east-1.pooler.supabase.com:6543/postgres?sslmode=require
+    username: postgres.rlsuzveutyfpasskdfix
+    password: Ns!nqpWK$C8bR$x
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      data-source-properties:
+        prepareThreshold: 0
+  sql:
+    init:
+      mode: never
+      data-locations: ''
+  jpa:
+    defer-datasource-initialization: false
+    properties:
+      hibernate:
+        format_sql: true
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        default_schema: bd_usuarios
+    hibernate:
+      ddl-auto: validate
+    show-sql: true
+  flyway:
+    enabled: true
+    default-schema: bd_usuarios
+    schemas: bd_usuarios
+    locations: classpath:db/migration
+
+server:
+  port: 8082
+
+logging:
+  level:
+    org:
+      springframework:
+        web: INFO
+      hibernate:
+        SQL: INFO
+    root: INFO
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+  instance:
+    prefer-ip-address: true

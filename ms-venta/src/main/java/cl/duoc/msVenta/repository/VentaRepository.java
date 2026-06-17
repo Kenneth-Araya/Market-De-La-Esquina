@@ -13,7 +13,7 @@ public interface VentaRepository extends JpaRepository<Venta, Long> {
     
     void deleteByIdVenta(Long idVenta);
 
-    List<Venta> findAllByOrderByIdAsc();
+    List<Venta> findAllByOrderByIdVentaAsc();
 
-    boolean existsByDescripcion(String descripcionVenta);
+    boolean existsByDescripcionVenta(String descripcionVenta);
 }
