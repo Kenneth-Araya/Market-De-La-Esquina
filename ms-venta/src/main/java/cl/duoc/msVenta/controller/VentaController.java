@@ -49,7 +49,7 @@ public class VentaController {
         return ResponseEntity
         .ok(ventaDTOs);
     }
-
+    
     @Operation(
         summary = "registrar venta",
         description = "Crea y guarda una nueva venta en el sistema"

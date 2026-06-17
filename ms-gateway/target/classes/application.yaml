@@ -17,18 +17,20 @@ spring:
               uri: http://localhost:8084
               predicates:
                 - Path=/api/v1/productos/**
-            - id: ms-boleta
-              uri: http://localhost:8081
+            - id: boletas
+              uri: lb://ms-boleta
               predicates:
                 - Path=/api/v1/boletas/**
-            - id: ms-usuario
-              uri: http://localhost:8082
+            - id: usuarios
+              uri: lb://ms-usuario
               predicates:
                 - Path=/api/v1/usuarios/**
-            - id: ms-venta
-              uri: http://localhost:8083
+            - id: ventas
+              uri: lb://ms-venta
               predicates:
                 - Path=/api/v1/ventas/**
-              filters:
-                 - StripPrefix=2  
-            
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka/

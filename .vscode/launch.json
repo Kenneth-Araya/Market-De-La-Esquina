@@ -12,7 +12,8 @@
             "name": "MsEurekaApplication",
             "request": "launch",
             "mainClass": "cl.duoc.ms_eureka.MsEurekaApplication",
-            "projectName": "ms_eureka"
+            "projectName": "ms_eureka",
+            "vmArgs": " -Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.port=57181 -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Dspring.jmx.enabled=true -Djava.rmi.server.hostname=localhost -Dspring.application.admin.enabled=true -Dspring.boot.project.name=ms_eureka"
         },
         {
             "type": "java",
@@ -46,7 +47,8 @@
             "mainClass": "cl.duoc.sistemaMarket.SistemaMarketApplication",
             "projectName": "ms-boleta",
             "args": "",
-            "envFile": "${workspaceFolder}/.env"
+            "envFile": "${workspaceFolder}/.env",
+            "vmArgs": " -Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.port=50779 -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Dspring.jmx.enabled=true -Djava.rmi.server.hostname=localhost -Dspring.application.admin.enabled=true -Dspring.boot.project.name=ms-boleta"
         },
         {
             "type": "java",
@@ -76,7 +78,8 @@
             "mainClass": "cl.duoc.sistemaMarket.SistemaMarketApplication",
             "projectName": "ms-usuario",
             "args": "",
-            "envFile": "${workspaceFolder}/.env"
+            "envFile": "${workspaceFolder}/.env",
+            "vmArgs": " -Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.port=50759 -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Dspring.jmx.enabled=true -Djava.rmi.server.hostname=localhost -Dspring.application.admin.enabled=true -Dspring.boot.project.name=ms-usuario"
         },
         {
             "type": "java",
@@ -85,6 +88,17 @@
             "cwd": "${workspaceFolder}",
             "mainClass": "cl.duoc.msVenta.SistemaMarketApplication",
             "projectName": "ms-venta",
+            "args": "",
+            "envFile": "${workspaceFolder}/.env",
+            "vmArgs": " -Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.port=57210 -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Dspring.jmx.enabled=true -Djava.rmi.server.hostname=localhost -Dspring.application.admin.enabled=true -Dspring.boot.project.name=ms-venta"
+        },
+        {
+            "type": "java",
+            "name": "Spring Boot-ApigatewayApplication<apigateway>",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "mainClass": "cl.duoc.apigateway.ApigatewayApplication",
+            "projectName": "apigateway",
             "args": "",
             "envFile": "${workspaceFolder}/.env"
         }
