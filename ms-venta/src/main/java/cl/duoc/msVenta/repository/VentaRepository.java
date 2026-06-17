@@ -1,5 +1,6 @@
 package cl.duoc.msVenta.repository;
 
+import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
@@ -11,4 +12,8 @@ public interface VentaRepository extends JpaRepository<Venta, Long> {
     Optional<Venta> findByIdVenta(Long idVenta);
     
     void deleteByIdVenta(Long idVenta);
+
+    List<Venta> findAllByOrderByIdAsc();
+
+    boolean existsByDescripcion(String descripcionVenta);
 }
