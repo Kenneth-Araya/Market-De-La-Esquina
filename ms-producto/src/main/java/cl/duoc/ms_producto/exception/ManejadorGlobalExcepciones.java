@@ -1,6 +1,9 @@
 package cl.duoc.ms_producto.exception;
+import java.util.HashMap;
+import java.util.Map;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
@@ -35,6 +38,18 @@ public class ManejadorGlobalExcepciones {
         ErrorResponse error = new ErrorResponse("Error interno del servidor", e.getMessage());
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
     }
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+public ResponseEntity<Map<String, String>> handleValidationExceptions(MethodArgumentNotValidException ex) {
+    Map<String, String> errors = new HashMap<>();
+    
+    // Esto recorre todos los campos que fallaron y guarda el mensaje de error de cada uno
+    ex.getBindingResult().getFieldErrors().forEach(error -> 
+        errors.put(error.getField(), error.getDefaultMessage())
+    );
+    
+    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errors);
+}
 
     public class ErrorResponse {
         private String error;

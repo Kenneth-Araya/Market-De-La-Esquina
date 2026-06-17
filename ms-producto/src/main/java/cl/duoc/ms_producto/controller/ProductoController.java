@@ -47,7 +47,7 @@ public class ProductoController {
     }
     
     @Operation(
-        summary = "Registrar productos",
+        summary = "registrar producto",
         description = "Crea y guarda un nuevo producto en el minimarket"
     )
     @ApiResponses({
@@ -79,7 +79,7 @@ public class ProductoController {
     }
 
     @Operation(
-        summary = "Eliminacion de producto ",
+        summary = "eliminar producto ",
         description = "Elimina un producto existente del minimarket mediante su id"
     )
     @ApiResponses({
@@ -112,7 +112,7 @@ public class ProductoController {
     }
 
     @Operation(
-        summary = "Actualizar de producto ",
+        summary = "Actualizar producto ",
         description = "Actualiza la información de un producto existente basándose en su id"
     )
     @ApiResponses({
@@ -152,7 +152,7 @@ public class ProductoController {
     }
 
     @Operation(
-        summary = "Busca Producto Por ID",
+        summary = "listar producto por id",
         description = "Obtener los detalles de un producto especifico con el ID"
     )
     @ApiResponses({

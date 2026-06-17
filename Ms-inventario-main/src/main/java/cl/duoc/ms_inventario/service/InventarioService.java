@@ -1,5 +1,6 @@
 package cl.duoc.ms_inventario.service;
 import java.time.LocalDate;
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -26,14 +27,12 @@ public class InventarioService {
 
     public InventarioDTO validarObteniendoStock(Long idProducto){
         log.info("Iniciando validacion de stock para el producto: {}",idProducto);
-        // 1. Buscamos la entidad en la base de datos
+
         Inventario inventario=repo.findByIdProducto(idProducto)
                 .orElseThrow(()-> new RecursoNoEncontradoException("El producto no existe en el inventario"));
-        
-        // 2. Usamos el Mapper para convertir la Entidad a DTO
+    
         InventarioDTO dto=mapper.toDTO(inventario);
 
-        // 3. Aplicamos la Lógica de Negocio (Estado del producto)
         if (inventario.getFechaVencimiento() != null && inventario.getFechaVencimiento().isBefore(LocalDate.now())) {
             dto.setEstadoProducto("BLOQUEADO - VENCIDO");
             log.warn("Producto ID {} está vencido. Fecha: {}", idProducto, inventario.getFechaVencimiento());
@@ -62,16 +61,46 @@ public class InventarioService {
     public void descontarStock(Long idProducto, int cantidad){
         log.info("procesando salida de {} unidades para el producto {} ", cantidad, idProducto);
 
+        // 1. EL ESCUDO PROTECTOR: Bloqueamos números negativos y el cero
+        if (cantidad <= 0) {
+            log.error("Falla en salida: Intento de descontar cantidad invalida ({})", cantidad);
+            throw new IllegalArgumentException("La cantidad a descontar debe ser mayor a cero");
+        }
+
+        // 2. Buscamos el producto
         Inventario inv=repo.findByIdProducto(idProducto)
                 .orElseThrow(()->new RecursoNoEncontradoException("NO SE PUEDE DESCONTAR: PRODUCTO NO ENCONTRADO"));
+        
+        // 3. Validamos que alcance el stock
         if (inv.getStockActual()<cantidad){
             log.error("Falla en salida: Stock insuficiente para el producto {} ",idProducto);
             throw new RuntimeException("Stock insuficiente para realizar la venta");
         }
+        
+        // 4. Hacemos la matemática y guardamos
         inv.setStockActual(inv.getStockActual()-cantidad);
         repo.save(inv);
         log.info("Salida exitosa el nuevo stock es: {}",inv.getStockActual());
+    }
 
+    @Transactional
+    public void agregarStock(Long idProducto, int cantidad){
+        log.info("Procesando entrada de {} unidades para el producto {}", cantidad, idProducto);
+
+        // 1. Validamos que no intenten sumar números negativos o cero (para evitar que nos roben stock con un método de suma)
+        if (cantidad <= 0) {
+            log.error("Falla en entrada: Intento de agregar cantidad invalida ({})", cantidad);
+            throw new IllegalArgumentException("La cantidad a agregar debe ser mayor a cero");
+        }
+
+        // 2. Buscamos el producto en la BD
+        Inventario inv = repo.findByIdProducto(idProducto)
+                .orElseThrow(() -> new RecursoNoEncontradoException("NO SE PUEDE AGREGAR STOCK: PRODUCTO NO ENCONTRADO"));
+        
+        // 3. Sumamos la cantidad y guardamos
+        inv.setStockActual(inv.getStockActual() + cantidad);
+        repo.save(inv);
+        log.info("Entrada exitosa, el nuevo stock es: {}", inv.getStockActual());
     }
 
     
@@ -97,11 +126,40 @@ public class InventarioService {
 
         return listaDtos;
     }
+
+    public List<InventarioDTO> listarTodo() {
+        log.info("Buscando todo el inventario registrado");
+        
+        // 1. Traemos todo de la BD y lo pasamos a DTO
+        List<InventarioDTO> listaDtos = repo.findAll().stream()
+                .map(mapper::toDTO)
+                .sorted(Comparator.comparing(InventarioDTO::getIdProducto))
+                .collect(Collectors.toList());
+
+        listaDtos.forEach(dto -> {
+            if (dto.getStockActual() > 0) {
+                dto.setEstadoProducto("DISPONIBLE");
+            } else {
+                dto.setEstadoProducto("SIN STOCK");
+            }
+
+            try {
+                ProductoResponseDTO productoDto = productoClient.obtenerProductoPorId(dto.getIdProducto());
+                if (productoDto != null) {
+                    dto.setNombreProducto(productoDto.getNombre());
+                }
+            } catch (Exception e) {
+                log.error("Error Feign al traer nombre para el producto ID {}: {}", dto.getIdProducto(), e.getMessage());
+                dto.setNombreProducto("Nombre no disponible");
+            }
+        });
+
+        return listaDtos;
+    }
         
       
     
-    /*POSTERIORMENTE CUANDO SE IMPLEMENTE EL MICROSERVICIO PROVEEDOR 
-      SE AGREGARAN MAS METODOS RELEVANTES COMO AGREGAR STOCK */
+    
 
 
 

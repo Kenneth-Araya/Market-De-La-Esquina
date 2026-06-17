@@ -12,15 +12,15 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class ProductoDTO {
     @NotBlank(message = "el codigo de barra tiene que tener un valor")
-    @Size(max=13,message="El codigo de barra debe tener 13 caracteres para cumplir")
+    @Size(min=13,max=13,message="El codigo de barra debe tener 13 caracteres para cumplir")
     private String codigoBarra;
 
     @NotBlank(message = "el nombre no puede ser vacio")
-    @Size(max=50,message = "el nombre no puede ser mayor a 50 caracteres")
+    @Size(min=5,max=50,message = "el nombre no puede ser mayor a 50 caracteres")
     private String nombre;
 
     @NotBlank(message = "la descripcion no puede estar vacia")
-    @Size(max=100,message = "la descripcion no puede ser mayor a 100 caracteres")
+    @Size(min=10,max=100,message = "la descripcion no puede ser mayor a 100 caracteres")
     private String descripcion;
 
     @Positive(message = "el valor debe ser mayor que cero")
