@@ -1,36 +1,41 @@
 server:
-  port: 8080
+  port: 8090
 
 spring:
   application:
-    name: api-gateway
+    name: ms-gateway
   cloud:
     gateway:
-      server:
-        webflux:
-          routes:
-            - id: ms-inventario-main
-              uri: http://localhost:8085
-              predicates:
-                - Path=/api/v1/inventario/**
-            - id: ms-productos
-              uri: http://localhost:8084
-              predicates:
-                - Path=/api/v1/productos/**
-            - id: boletas
-              uri: lb://ms-boleta
-              predicates:
-                - Path=/api/v1/boletas/**
-            - id: usuarios
-              uri: lb://ms-usuario
-              predicates:
-                - Path=/api/v1/usuarios/**
-            - id: ventas
-              uri: lb://ms-venta
-              predicates:
-                - Path=/api/v1/ventas/**
+      discovery:
+        locator:
+          enabled: true
+      routes:
+        - id: ms-inventario
+          uri: lb://ms-inventario
+          predicates:
+            - Path=/api/v1/inventario/**
+
+        - id: ms-productos
+          uri: lb://ms-producto
+          predicates:
+            - Path=/api/v1/productos/**
+
+        - id: ms-boletas
+          uri: lb://ms-boleta
+          predicates:
+            - Path=/api/v1/boletas/**
+
+        - id: ms-usuarios
+          uri: lb://ms-usuario
+          predicates:
+            - Path=/api/v1/usuarios/**
+
+        - id: ms-ventas
+          uri: lb://ms-venta
+          predicates:
+            - Path=/api/v1/ventas/**
 
 eureka:
   client:
     service-url:
-      defaultZone: http://eureka-server:8761/eureka
+      defaultZone: http://localhost:8761/eureka/

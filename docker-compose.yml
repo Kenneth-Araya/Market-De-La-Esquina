@@ -11,9 +11,7 @@ services:
       - ms-network
 
   api-gateway:
-    build:
-      context: ./ms-gateway
-    image: api-gateway:latest
+    build: ./ms-gateway
     container_name: api-gateway
     ports:
       - "8080:8080"
@@ -25,7 +23,7 @@ services:
       - ms-network
 
   ms-venta:
-    image: ms-venta:latest
+    build: ./ms-venta
     container_name: ms-venta
     ports:
       - "8083:8083"
@@ -37,9 +35,7 @@ services:
       - ms-network
 
   ms-boletas:
-    build:
-      context: ./ms-boleta
-    image: ms-boletas:latest
+    build: ./ms-boleta
     container_name: ms-boletas
     ports:
       - "8081:8081"
@@ -51,9 +47,7 @@ services:
       - ms-network
 
   ms-usuarios:
-    build:
-      context: ./ms-usuario
-    image: ms-usuarios:latest
+    build: ./ms-usuario
     container_name: ms-usuarios
     ports:
       - "8082:8082"
@@ -65,7 +59,7 @@ services:
       - ms-network
 
   ms-producto:
-    image: ms-producto:latest
+    build: ./ms-producto
     container_name: ms-producto
     ports:
       - "8084:8084"
@@ -77,7 +71,7 @@ services:
       - ms-network
 
   ms-inventario:
-    image: ms-inventario:latest
+    build: ./ms-inventario
     container_name: ms-inventario
     ports:
       - "8085:8085"

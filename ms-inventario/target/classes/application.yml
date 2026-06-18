@@ -1,53 +1,32 @@
-# Conversion to YAML from Properties formar report
-# Warnings:
-# - The yaml file had comments which are lost in the refactoring!
+server:
+  port: 8085
+
 spring:
   application:
     name: ms-inventario
-  output:
-    ansi:
-      enabled: ALWAYS
+    
   datasource:
-    url: jdbc:postgresql://aws-1-sa-east-1.pooler.supabase.com:6543/postgres?sslmode=require&prepareThreshold=0
-    username: postgres.rlsuzveutyfpasskdfix
-    password: Ns!nqpWK$C8bR$x
+    url: ${DB_URL}
+    username: ${DB_USER}
+    password: ${DB_PASSWORD}
     driver-class-name: org.postgresql.Driver
-  sql:
-    init:
-      mode: never
-      data-locations: ''
+    
   jpa:
-    defer-datasource-initialization: false
+    hibernate:
+      ddl-auto: update
+    show-sql: true
     properties:
       hibernate:
         format_sql: true
-        dialect: org.hibernate.dialect.PostgreSQLDialect
         default_schema: bd_inventario
-    hibernate:
-      ddl-auto: validate
-    show-sql: true
+        
   flyway:
     enabled: true
     default-schema: bd_inventario
-    schemas: bd_inventario
-    locations: classpath:db/migration
-    baseline-on-migrate: true
-    validate-on-migrate: false
-    out-of-order: true
-server:
-  port: 8085
-logging:
-  level:
-    org:
-      springframework:
-        web: INFO
-      hibernate:
-        SQL: INFO
-    root: INFO
 
 eureka:
   client:
     service-url:
-      defaultZone: http://eureka-server:8761/eureka
-    register-with-eureka: true
-    fetch-registry: true
+      defaultZone: http://localhost:8761/eureka/
+  instance:
+    prefer-ip-address: true

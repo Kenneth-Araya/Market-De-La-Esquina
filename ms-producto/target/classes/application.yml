@@ -1,57 +1,32 @@
-# Conversion to YAML from Properties formar report
-# Warnings:
-# - The yaml file had comments which are lost in the refactoring!
+server:
+  port: 8084
+
 spring:
   application:
     name: ms-producto
-  output:
-    ansi:
-      enabled: ALWAYS
+    
   datasource:
-    url: jdbc:postgresql://aws-1-sa-east-1.pooler.supabase.com:6543/postgres?sslmode=require
-    username: postgres.rlsuzveutyfpasskdfix
-    password: Ns!nqpWK$C8bR$x
+    url: ${DB_URL}
+    username: ${DB_USER}
+    password: ${DB_PASSWORD}
     driver-class-name: org.postgresql.Driver
-  sql:
-    init:
-      mode: never
+    
   jpa:
-    defer-datasource-initialization: false
     hibernate:
-      ddl-auto: validate
+      ddl-auto: update
+    show-sql: true
     properties:
       hibernate:
         format_sql: true
-        dialect: org.hibernate.dialect.PostgreSQLDialect
         default_schema: bd_productos
-    show-sql: true
-    open-in-view: false
+        
   flyway:
     enabled: true
-    baseline-on-migrate: true
-    schemas: bd_productos
-    validate-on-migrate: false
-    out-of-order: true
-server:
-  port: 8084
-logging:
-  level:
-    org:
-      springframework:
-        web: INFO
-      hibernate:
-        SQL: INFO
-    root: INFO
-springdoc:
-  api-docs:
-    enabled: true
-  swagger-ui:
-    enabled: true
-    path: /doc/swagger-ui.html
+    default-schema: bd_productos
 
 eureka:
   client:
     service-url:
-      defaultZone: http://eureka-server:8761/eureka
-    register-with-eureka: true
-    fetch-registry: true
+      defaultZone: http://localhost:8761/eureka/
+  instance:
+    prefer-ip-address: true
