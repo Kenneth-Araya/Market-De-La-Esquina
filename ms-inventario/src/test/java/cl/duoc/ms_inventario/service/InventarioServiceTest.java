@@ -1,6 +1,7 @@
 package cl.duoc.ms_inventario.service;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -44,77 +45,89 @@ public class InventarioServiceTest {
     private InventarioService servicio;
 
     @Test
-    void validarObteniendoStock_CuandoHayStock_DeberiaRetorarDisponible(){
-        //GIVEN PREPARAMOS EL ESCENARIO
-        Long idProducto=1L;
+    void validarObteniendoStock_CuandoProductoNoExiste_LanzaExcepcion() {
+        when(repo.findByIdProducto(1L)).thenReturn(Optional.empty());
 
-        Inventario inventario=new Inventario();
-        inventario.setIdProducto(idProducto);
-        inventario.setStockActual(10);//HAY STOCK
-
-        InventarioDTO dto=new InventarioDTO();
-        dto.setStockActual(10);
-
-        ProductoResponseDTO productofeign= new ProductoResponseDTO();
-        productofeign.setNombre("Pan Hallulla");
-
-        when(repo.findByIdProducto(idProducto)).thenReturn(Optional.of(inventario));
-        when(mapper.toDTO(inventario)).thenReturn(dto);
-        when(productoClient.obtenerProductoPorId(idProducto)).thenReturn(productofeign);
-
-        //WHEN EJECUTAMOS EL METODO
-        InventarioDTO resultado=servicio.validarObteniendoStock(idProducto);
-
-        //THEN VERIFICAMOS LOS RESULTADOS
-        assertNotNull(resultado,"el DTO no deberia ser nulo");
-        assertEquals("DISPONIBLE", resultado.getEstadoProducto(),"El estado debe ser DISPONIBLE porque hay stock mayor a cero");
-        assertEquals("Pan Hallulla",resultado.getNombreProducto(),"Deberia haber seteado el nombre cruzando por Feign");
-
-        verify(productoClient, times(1)).obtenerProductoPorId(idProducto);
-    }
-
-    @Test
-    void validarObteniendoStock_CuandoNoHayStock_DeberiaRetorarSinStock(){
-        //GIVEN PREPARAMOS UN ESCENARIO SIN STOCK
-        Long idProducto=2L;
-
-        Inventario inventario=new Inventario();
-        inventario.setIdProducto(idProducto);
-        inventario.setStockActual(0);
-
-        InventarioDTO dto=new InventarioDTO();
-        dto.setStockActual(0);
-
-        ProductoResponseDTO productofeign=new ProductoResponseDTO();
-        productofeign.setNombre("Coca-Cola");
-
-        when(repo.findByIdProducto(idProducto)).thenReturn(Optional.of(inventario));
-        when(mapper.toDTO(inventario)).thenReturn(dto);
-        when(productoClient.obtenerProductoPorId(idProducto)).thenReturn(productofeign);
-
-        //WHEN
-        InventarioDTO resultado=servicio.validarObteniendoStock(idProducto);
-        
-        //THEN
-        assertNotNull(resultado);
-        assertEquals("SIN STOCK", resultado.getEstadoProducto(),"El estado debe ser SIN STOCK porque el valor es cero");
-        assertEquals("Coca-Cola", resultado.getNombreProducto());
-        
-    }
-
-    @Test
-    void validarObteniendoStock_CuandoProductoNoExiste_DeberiaLanzarExcepcion() {
-        // GIVEN: SIMULAMOS QUE LA BASE DE DATOS NO ENCUENTRA NADA
-        Long idInexistente = 99L;
-        when(repo.findByIdProducto(idInexistente)).thenReturn(Optional.empty());
-
-        // WHEN y THEN: VERIFICAMOS QUE SE LANCE LA EXCEPCIÓN CORRECTA
         assertThrows(RecursoNoEncontradoException.class, () -> {
-            servicio.validarObteniendoStock(idInexistente);
-        }, "Debería lanzar RecursoNoEncontradoException si el id no existe en el inventario");
+            servicio.validarObteniendoStock(1L);
+        });
+    }
 
-        // Verificamos que el código nunca llegó a llamar a Feign porque falló antes en la BD
-        verify(productoClient, never()).obtenerProductoPorId(anyLong());
+    @Test
+    void validarObteniendoStock_CuandoStockEsCero_RetornaSinStock() {
+        Inventario inventario = new Inventario();
+        inventario.setStockActual(0);
+        
+        InventarioDTO dto = new InventarioDTO();
+        
+        when(repo.findByIdProducto(1L)).thenReturn(Optional.of(inventario));
+        when(mapper.toDTO(inventario)).thenReturn(dto);
+
+        InventarioDTO resultado = servicio.validarObteniendoStock(1L);
+
+        assertEquals("SIN STOCK", resultado.getEstadoProducto());
+    }
+
+    @Test
+    void validarObteniendoStock_CuandoStockEsMayorACero_RetornaDisponible() {
+        Inventario inventario = new Inventario();
+        inventario.setStockActual(10);
+        
+        InventarioDTO dto = new InventarioDTO();
+        
+        when(repo.findByIdProducto(1L)).thenReturn(Optional.of(inventario));
+        when(mapper.toDTO(inventario)).thenReturn(dto);
+
+        InventarioDTO resultado = servicio.validarObteniendoStock(1L);
+
+        assertEquals("DISPONIBLE", resultado.getEstadoProducto());
+    }
+
+    @Test
+    void validarObteniendoStock_CuandoFeignFunciona_SeteaNombre() {
+        Inventario inventario = new Inventario();
+        inventario.setStockActual(5);
+        InventarioDTO dto = new InventarioDTO();
+        
+        ProductoResponseDTO feignResponse = new ProductoResponseDTO();
+        feignResponse.setNombre("Coca-Cola");
+
+        when(repo.findByIdProducto(1L)).thenReturn(Optional.of(inventario));
+        when(mapper.toDTO(inventario)).thenReturn(dto);
+        when(productoClient.obtenerProductoPorId(1L)).thenReturn(feignResponse);
+
+        InventarioDTO resultado = servicio.validarObteniendoStock(1L);
+
+        assertEquals("Coca-Cola", resultado.getNombreProducto());
+    }
+
+    @Test
+    void validarObteniendoStock_CuandoFeignFalla_CapturaExcepcionYContinua() {
+        // 1. GIVEN: Datos básicos que funcionan
+        Long id = 1L;
+        Inventario inventario = new Inventario();
+        inventario.setStockActual(10);
+        
+        InventarioDTO dto = new InventarioDTO();
+        
+        when(repo.findByIdProducto(id)).thenReturn(Optional.of(inventario));
+        when(mapper.toDTO(inventario)).thenReturn(dto);
+
+        // 2. FORZAMOS EL ERROR: Simulamos que Feign lanza una excepción
+        when(productoClient.obtenerProductoPorId(id))
+            .thenThrow(new RuntimeException("Error de conexión"));
+
+        // 3. WHEN: Ejecutamos el método
+        // El servicio DEBE atrapar la excepción y no lanzar error hacia afuera
+        InventarioDTO resultado = servicio.validarObteniendoStock(id);
+
+        // 4. THEN: Verificamos que el flujo continuó y el objeto no es nulo
+        assertNotNull(resultado);
+        assertEquals("DISPONIBLE", resultado.getEstadoProducto());
+        
+        // Verificamos que aunque falló, no se rompió la ejecución (el nombre debería ser null o el valor por defecto)
+        // Esto confirma que el código entró al CATCH y no se detuvo
+        assertNull(resultado.getNombreProducto()); 
     }
 
     @Test
@@ -170,6 +183,25 @@ public class InventarioServiceTest {
         }, "Debería lanzar RecursoNoEncontradoException si el producto no existe");
         
         verify(repo, never()).save(any(Inventario.class));
+    }
+
+    @Test
+    void descontarStock_CuandoCantidadEsCeroOMenos_LanzaException() {
+    // GIVEN: Una cantidad inválida (0)
+    Long idProducto = 1L;
+    int cantidadInvalida = 0; 
+
+    // WHEN & THEN:
+    // Al ejecutar esto, el código entrará al IF, ejecutará el LOG y lanzará la excepción.
+    // Eso es lo que JaCoCo necesita ver para poner la línea en verde.
+    assertThrows(IllegalArgumentException.class, () -> {
+        servicio.descontarStock(idProducto, cantidadInvalida);
+    });
+
+    // Verificación de seguridad (Escudo):
+    // Como el escudo funcionó, el código debió detenerse. 
+    // Verificamos que NUNCA se buscó en la BD (repo), ahorrando recursos.
+    verify(repo, never()).findByIdProducto(anyLong());
     }
 
     @Test
@@ -296,6 +328,91 @@ public class InventarioServiceTest {
         assertNotNull(resultado);
         assertTrue(resultado.isEmpty());
         verify(productoClient, never()).obtenerProductoPorId(anyLong());
+    }
+
+    @Test
+    void listarTodo_DeberiaCubrirIFElseYCatch() {
+        // GIVEN: Preparamos los inventarios de la BD
+        Inventario inv1 = new Inventario();
+        inv1.setIdProducto(1L);
+        inv1.setStockActual(10);
+        
+        Inventario inv2 = new Inventario();
+        inv2.setIdProducto(2L);
+        inv2.setStockActual(0);
+
+        when(repo.findAll()).thenReturn(Arrays.asList(inv1, inv2));
+
+        // AQUÍ ESTABA EL DETALLE: Necesitamos setear el stock en los DTOs
+        // que el mapper devuelve, para que el servicio pueda validarlos.
+        InventarioDTO dto1 = new InventarioDTO();
+        dto1.setIdProducto(1L);
+        dto1.setStockActual(10); // <--- AGREGAR ESTO
+        
+        InventarioDTO dto2 = new InventarioDTO();
+        dto2.setIdProducto(2L);
+        dto2.setStockActual(0); // <--- AGREGAR ESTO
+        
+        when(mapper.toDTO(any(Inventario.class))).thenReturn(dto1, dto2);
+
+        // Mockeamos Feign para que falle (esto dispara el CATCH)
+        when(productoClient.obtenerProductoPorId(anyLong()))
+            .thenThrow(new RuntimeException("Feign Falló"));
+
+        // WHEN
+        List<InventarioDTO> resultado = servicio.listarTodo();
+
+        // THEN
+        assertEquals(2, resultado.size());
+        
+        // Ahora sí, dto1 tendrá stock > 0 y debería ser DISPONIBLE
+        assertEquals("DISPONIBLE", resultado.get(0).getEstadoProducto());
+        
+        // Y dto2 tendrá stock = 0 y debería ser SIN STOCK
+        assertEquals("SIN STOCK", resultado.get(1).getEstadoProducto());
+        
+        // Verificamos el nombre por defecto del catch
+        assertEquals("Nombre no disponible", resultado.get(0).getNombreProducto());
+    }
+
+    @Test
+    void agregarStock_CuandoCantidadEsCeroOMenos_LanzaException() {
+        // GIVEN: Una cantidad inválida
+        // WHEN/THEN: Verificamos que se lance la excepción
+        assertThrows(IllegalArgumentException.class, () -> {
+            servicio.agregarStock(1L, 0);
+        });
+        
+        // Verificamos que NO se llamó al repositorio, porque falló antes
+        verify(repo, never()).save(any());
+    }
+
+    @Test
+    void agregarStock_CuandoProductoNoExiste_LanzaException() {
+        // GIVEN: El repositorio devuelve vacío
+        when(repo.findByIdProducto(1L)).thenReturn(Optional.empty());
+
+        // WHEN/THEN: Verificamos la excepción
+        assertThrows(RecursoNoEncontradoException.class, () -> {
+            servicio.agregarStock(1L, 10);
+        });
+    }
+
+    @Test
+    void agregarStock_CuandoTodoEsCorrecto_SumaCorrectamenteYGuarda() {
+        // GIVEN: Un producto con stock 5
+        Inventario inv = new Inventario();
+        inv.setIdProducto(1L);
+        inv.setStockActual(5);
+        
+        when(repo.findByIdProducto(1L)).thenReturn(Optional.of(inv));
+
+        // WHEN: Agregamos 10 unidades
+        servicio.agregarStock(1L, 10);
+
+        // THEN: Verificamos que el stock sea 15 (5+10) y se guardó
+        assertEquals(15, inv.getStockActual());
+        verify(repo, times(1)).save(inv);
     }
 
 

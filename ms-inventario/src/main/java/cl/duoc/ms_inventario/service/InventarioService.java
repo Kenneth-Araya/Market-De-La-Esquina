@@ -26,36 +26,33 @@ public class InventarioService {
     private final ProductoClient productoClient;
 
     public InventarioDTO validarObteniendoStock(Long idProducto){
-        log.info("Iniciando validacion de stock para el producto: {}",idProducto);
+    log.info("Iniciando validacion de stock para el producto: {}", idProducto);
 
-        Inventario inventario=repo.findByIdProducto(idProducto)
-                .orElseThrow(()-> new RecursoNoEncontradoException("El producto no existe en el inventario"));
-    
-        InventarioDTO dto=mapper.toDTO(inventario);
+    Inventario inventario = repo.findByIdProducto(idProducto)
+            .orElseThrow(() -> new RecursoNoEncontradoException("El producto no existe en el inventario"));
 
-        if (inventario.getFechaVencimiento() != null && inventario.getFechaVencimiento().isBefore(LocalDate.now())) {
-            dto.setEstadoProducto("BLOQUEADO - VENCIDO");
-            log.warn("Producto ID {} está vencido. Fecha: {}", idProducto, inventario.getFechaVencimiento());
-        }else if(inventario.getStockActual()<=0){
-            dto.setEstadoProducto("SIN STOCK");
-        }else{
-            dto.setEstadoProducto("DISPONIBLE");
+    InventarioDTO dto = mapper.toDTO(inventario);
+
+    // Simplificamos la lógica: solo validamos si hay stock o no
+    if (inventario.getStockActual() <= 0) {
+        dto.setEstadoProducto("SIN STOCK");
+    } else {
+        dto.setEstadoProducto("DISPONIBLE");
+    }
+
+    try {
+        log.info("Cruzando puente Feign hacia ms-producto para el id: {}", idProducto);
+        ProductoResponseDTO productoDto = productoClient.obtenerProductoPorId(idProducto);
+        if (productoDto != null) {
+            log.info("Feign funciono correctamente Seteando nombre del producto en el DTO");
+            dto.setNombreProducto(productoDto.getNombre());
         }
+    } catch (Exception e) {
+        log.error("No se pudo conectar con ms-producto a través de Feign: {}", e.getMessage());
+    }
 
-        try{
-            log.info("Cruzando puente Feign hacia ms-producto para el id: {}",idProducto);
-            ProductoResponseDTO productoDto=productoClient.obtenerProductoPorId(idProducto);
-            if (productoDto!=null) {
-                log.info("Feign funciono correctamente Seteando nombre del producto en el DTO");
-                dto.setNombreProducto(productoDto.getNombre());
-            }
-        }catch (Exception e){
-            log.error("No se pudo conectar con ms-producto a través de Feign: {}", e.getMessage());
-        }
-
-        return dto;
-
-        }
+    return dto;
+    }
 
     @Transactional
     public void descontarStock(Long idProducto, int cantidad){

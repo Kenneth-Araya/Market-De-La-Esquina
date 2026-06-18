@@ -1,6 +1,13 @@
 package cl.duoc.ms_inventario.controller;
 import cl.duoc.ms_inventario.dto.InventarioDTO;
+import cl.duoc.ms_inventario.exception.ManejadorGlobalExcepciones;
+import cl.duoc.ms_inventario.exception.RecursoNoEncontradoException;
 import cl.duoc.ms_inventario.service.InventarioService;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import java.util.Arrays;
 import java.util.List;
 import org.junit.jupiter.api.Test;
@@ -31,6 +38,33 @@ public class InventarioControllerTest {
       dtoMock.setEstadoProducto("DISPONIBLE");
       Mockito.when(this.servicio.validarObteniendoStock(idProducto)).thenReturn(dtoMock);
       this.mockMvc.perform(MockMvcRequestBuilders.get("/api/v1/inventario/{id}", new Object[]{idProducto})).andExpect(MockMvcResultMatchers.jsonPath("$.idProducto", new Object[0]).value(idProducto)).andExpect(MockMvcResultMatchers.jsonPath("$.stockActual", new Object[0]).value(20)).andExpect(MockMvcResultMatchers.jsonPath("$.estadoProducto", new Object[0]).value("DISPONIBLE"));
+   }
+
+   @Test
+    void consultarStock_CuandoNoExiste_Retorna404() throws Exception {
+        when(servicio.validarObteniendoStock(99L))
+            .thenThrow(new RecursoNoEncontradoException("No existe"));
+
+        mockMvc.perform(get("/api/v1/inventario/99"))
+               .andExpect(status().isNotFound());
+    }
+
+   @Test
+   void consultarStock_CuandoIdNoEsNumero_DeberiaRetornar400() throws Exception {
+    // Intentamos pasar "abc" en lugar de un ID numérico (Long)
+    mockMvc.perform(get("/api/v1/inventario/abc"))
+           .andExpect(status().isBadRequest())
+           .andExpect(jsonPath("$.error").value("Petición incorrecta (Parámetro inválido)"));
+   }
+
+   @Test
+   void listarTodo_CuandoOcurreErrorInesperado_DeberiaRetornar500() throws Exception {
+    // Simulamos que el servicio falla de forma inesperada
+    when(servicio.listarTodo()).thenThrow(new RuntimeException("Error sorpresa"));
+
+    mockMvc.perform(get("/api/v1/inventario"))
+           .andExpect(status().isInternalServerError())
+           .andExpect(jsonPath("$.error").value("Error interno del servidor"));
    }
 
    @Test
@@ -72,4 +106,19 @@ public class InventarioControllerTest {
       String mensajeEsperado = "Stock actualizado: se agregaron " + cantidad + " unidades";
       this.mockMvc.perform(MockMvcRequestBuilders.post("/api/v1/inventario/{id}/agregar", new Object[]{idProducto}).param("cantidad", new String[]{String.valueOf(cantidad)})).andExpect(MockMvcResultMatchers.status().isOk()).andExpect(MockMvcResultMatchers.content().string(mensajeEsperado));
    }
+
+   @Test
+    void testErrorResponseGettersAndSetters() {
+        // Como es una clase estática anidada, la instanciamos así:
+        ManejadorGlobalExcepciones.ErrorResponse error = new ManejadorGlobalExcepciones.ErrorResponse("Error Inicial", "Mensaje Inicial");
+
+        // Probamos los setters
+        error.setError("Nuevo Error");
+        error.setMensaje("Nuevo Mensaje");
+
+        // Probamos los getters
+        assertEquals("Nuevo Error", error.getError());
+        assertEquals("Nuevo Mensaje", error.getMensaje());
+    }
+    
 }
