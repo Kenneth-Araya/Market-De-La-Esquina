@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
 import cl.duoc.msVenta.Client.BoletaClient;
 import cl.duoc.msVenta.dto.BoletaVentaDTO;
 import cl.duoc.msVenta.dto.VentaDTO;
@@ -23,8 +22,8 @@ import lombok.extern.slf4j.Slf4j;
 @Transactional
 public class VentaService {
 
-    @Autowired
-    private VentaRepository ventaRepository;
+
+    private final VentaRepository ventaRepository; 
     private final BoletaClient boletaClient;
 
     // Listar ventas
@@ -103,6 +102,11 @@ public class VentaService {
             log.error("Validación fallida: la venta o codigo de transaccion son nulos o vacíos");
             throw new IllegalArgumentException("La venta o su codigo de transaccion no pueden ser nulos o vacios");
         }
+
+        // regla de negocio
+        if (ventaRepository.existsByDescripcionVenta(ventaDTO.getDescripcionVentaDto())) {
+        throw new IllegalArgumentException("Ya existe una venta con esa descripcion");
+}
 
         // regla de negocio: debe tener productos
         if (ventaDTO.getProductos() == null || ventaDTO.getProductos().isEmpty()) {

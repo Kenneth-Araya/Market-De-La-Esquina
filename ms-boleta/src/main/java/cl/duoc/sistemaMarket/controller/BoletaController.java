@@ -48,6 +48,7 @@ public class BoletaController {
         .ok(boletaDTOs);
     }
 
+    //guardar boleta
     @PostMapping()
     public ResponseEntity<BoletaDTO> guardarBoleta(@Valid @RequestBody BoletaDTO boletaDTO) {
         BoletaDTO guardado = boletaService.guardarBoleta(boletaDTO);

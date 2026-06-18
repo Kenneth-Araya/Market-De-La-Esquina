@@ -1,191 +1,345 @@
 package cl.duoc.sistemaMarket.Service;
-
+ 
+import java.time.LocalDate;
+import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
-import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import cl.duoc.msVenta.Client.BoletaClient;
+import cl.duoc.msVenta.dto.BoletaVentaDTO;
 import cl.duoc.msVenta.dto.VentaDTO;
-import cl.duoc.msVenta.exeptions.RecursoNoEncontradoException;
 import cl.duoc.msVenta.model.Venta;
 import cl.duoc.msVenta.repository.VentaRepository;
 import cl.duoc.msVenta.service.VentaService;
-
+ 
 @ExtendWith(MockitoExtension.class)
 public class VentaServiceTest {
-
+ 
     @Mock
     private VentaRepository ventaRepository;
-
+ 
+    @Mock
+    private BoletaClient boletaClient;
+ 
     @InjectMocks
     private VentaService ventaService;
-
-    //test unitario listar todas las ventas
+ 
+    private VentaDTO buildVentaDTO(String descripcion) {
+        VentaDTO dto = new VentaDTO();
+        dto.setDescripcionVentaDto(descripcion);
+        dto.setCodigoTransaccionVentaDto("TXN-001");
+        dto.setProductos(List.of("PROD-001"));
+        dto.setMontoPagoVentaDto(10000.0);
+        return dto;
+    }
+ 
+    private BoletaVentaDTO buildBoletaDTO(String folio) {
+        BoletaVentaDTO dto = new BoletaVentaDTO();
+        dto.setFolio(folio);
+        dto.setEstado("PENDIENTE");
+        dto.setFecha(LocalDate.now());
+        return dto;
+    }
+ 
     @Test
-    void listarVentas_DeberiaRetornarListaDeDtos(){
-        Venta venta = new Venta();
+    void listarTodos_RepositorioVacio_DeberiaRetornarListaVacia() {
+        when(ventaRepository.findAll()).thenReturn(Collections.emptyList());
+ 
+        List<VentaDTO> resultado = ventaService.listarTodos();
+ 
+        assertNotNull(resultado);
+        assertTrue(resultado.isEmpty());
+        verify(ventaRepository, times(1)).findAll();
+    }
+ 
+    @Test
+    void guardarVenta_ProductosListaVacia_DeberiaLanzarIllegalArgumentException() {
+        VentaDTO dto = new VentaDTO();
+        dto.setCodigoTransaccionVentaDto("TXN-001");
+        dto.setProductos(Collections.emptyList()); 
+ 
+        assertThrows(IllegalArgumentException.class, () -> ventaService.guardarVenta(dto));
+        verify(ventaRepository, never()).save(any());
+    }
+ 
+    @Test
+    void guardarVenta_CodigoTransaccionNulo_DeberiaLanzarIllegalArgumentException() {
+        VentaDTO dto = new VentaDTO();
+        dto.setProductos(List.of("PROD-001"));
+        dto.setCodigoTransaccionVentaDto(null); 
+ 
+        assertThrows(IllegalArgumentException.class, () -> ventaService.guardarVenta(dto));
+        verify(ventaRepository, never()).save(any());
+    }
+ 
+    @Test
+    void guardarVenta_CodigoTransaccionVacio_DeberiaLanzarIllegalArgumentException() {
+        VentaDTO dto = new VentaDTO();
+        dto.setProductos(List.of("PROD-001"));
+        dto.setCodigoTransaccionVentaDto(""); 
+ 
+        assertThrows(IllegalArgumentException.class, () -> ventaService.guardarVenta(dto));
+        verify(ventaRepository, never()).save(any());
+    }
+ 
 
+    @Test
+    void findById_IdNoExiste_DeberiaLanzarRuntimeException() {
+        when(ventaRepository.findById(999L)).thenReturn(Optional.empty());
+ 
+        assertThrows(RuntimeException.class, () -> ventaService.findById(999L));
+        verify(ventaRepository, times(1)).findById(999L);
+    }
+ 
+
+    @Test
+    void actualizarVenta_CodigoTransaccionNulo_DeberiaLanzarIllegalArgumentException() {
+        VentaDTO dto = new VentaDTO();
+        dto.setCodigoTransaccionVentaDto(null);
+        dto.setProductos(List.of("PROD-001"));
+ 
+        assertThrows(IllegalArgumentException.class,
+                () -> ventaService.actualizarVenta(1L, dto));
+        verify(ventaRepository, never()).save(any());
+    }
+ 
+    @Test
+    void actualizarVenta_CodigoTransaccionVacio_DeberiaLanzarIllegalArgumentException() {
+        VentaDTO dto = new VentaDTO();
+        dto.setCodigoTransaccionVentaDto("");
+        dto.setProductos(List.of("PROD-001"));
+ 
+        assertThrows(IllegalArgumentException.class,
+                () -> ventaService.actualizarVenta(1L, dto));
+        verify(ventaRepository, never()).save(any());
+    }
+ 
+    @Test
+    void actualizarVenta_SinProductos_DeberiaLanzarIllegalArgumentException() {
+        VentaDTO dto = new VentaDTO();
+        dto.setCodigoTransaccionVentaDto("TXN-001");
+        dto.setDescripcionVentaDto("Descripcion unica");
+        dto.setProductos(Collections.emptyList());
+ 
+        when(ventaRepository.existsByDescripcionVenta("Descripcion unica")).thenReturn(false);
+ 
+        assertThrows(IllegalArgumentException.class,
+                () -> ventaService.actualizarVenta(1L, dto));
+        verify(ventaRepository, never()).save(any());
+    }
+ 
+    @Test
+    void actualizarVenta_DescripcionDuplicada_DeberiaLanzarIllegalArgumentException() {
+        VentaDTO dto = buildVentaDTO("Descripcion ya existente");
+ 
+        when(ventaRepository.existsByDescripcionVenta("Descripcion ya existente")).thenReturn(true);
+ 
+        assertThrows(IllegalArgumentException.class,
+                () -> ventaService.actualizarVenta(1L, dto));
+        verify(ventaRepository, never()).findByIdVenta(anyLong());
+        verify(ventaRepository, never()).save(any());
+    }
+
+    @Test
+    void eliminarPorId_Exitoso_DeberiaRetornarTrue() {
+        Venta venta = new Venta();
         venta.setIdVenta(1L);
-        venta.setDescripcionVenta("Compra bebidas y snacks");
-
-        when(ventaRepository.findAllByOrderByIdVentaAsc()).thenReturn(List.of(venta));
-
-        List<VentaDTO>resultado=ventaService.listarTodos();
-
-        assertNotNull(resultado,"la lista no deberia ir null");
-        assertEquals(1, resultado.size(),"la lista deberia tener minimo una venta");
-        assertEquals("Compra bebidas y snacks", resultado.get(0).getDescripcionVentaDto(),"La descripcion no coincide");
-
-        verify(ventaRepository, times(1)).findAllByOrderByIdVentaAsc();
+        when(ventaRepository.findByIdVenta(1L)).thenReturn(Optional.of(venta));
+ 
+        boolean resultado = ventaService.eliminarPorId(1L);
+ 
+        assertTrue(resultado);
+        verify(ventaRepository, times(1)).deleteByIdVenta(1L);
     }
-
-    //test unitario guardar las ventas
+ 
+ 
     @Test
-    void guardarVenta_IllegalArgumentException(){
-        VentaDTO ventadto = new VentaDTO();
-        ventadto.setDescripcionVentaDto("Ventas de media docena de huevos");
-
-        when(ventaRepository.existsByDescripcionVenta("Ventas de media docena de huevos")).thenReturn(true);
-
-        assertThrows(IllegalArgumentException.class,()->{
-            ventaService.guardarVenta(ventadto);
-        },"IllegalArgumentException cuando la descripcion sea existente");
-        verify(ventaRepository, never()).save(any(Venta.class));
+    void listarBoletas_DeberiaRetornarListaDesdeFeignClient() {
+        List<BoletaVentaDTO> boletas = List.of(buildBoletaDTO("BOL-001"), buildBoletaDTO("BOL-002"));
+        when(boletaClient.listarBoletas()).thenReturn(boletas);
+ 
+        List<BoletaVentaDTO> resultado = ventaService.listarBoletas();
+ 
+        assertNotNull(resultado);
+        assertEquals(2, resultado.size());
+        verify(boletaClient, times(1)).listarBoletas();
     }
-
-    //test unitario guardar con condicion
+ 
     @Test
-    void guardarVenta_CuandoLaDescripcionNoExista(){
-        VentaDTO ventadto = new VentaDTO();
-        ventadto.setDescripcionVentaDto("Ventas de media docena de huevos");
-        ventadto.setMontoPagoVentaDto(6000.0);
-    
-        when(ventaRepository.existsByDescripcionVenta("Ventas de media docena de huevos")).thenReturn(false);
-
-        Venta venta = new Venta();
-        venta.setDescripcionVenta("Ventas de media docena de huevos");
-        venta.setMontoVenta(6000.0);
-        when(ventaRepository.save(any(Venta.class))).thenReturn(venta);
-        
-        VentaDTO resultado = ventaService.guardarVenta(ventadto);
-
-        assertNotNull(resultado,"La venta guardada no deberia ser null");
-        assertEquals(6000.0, resultado.getMontoPagoVentaDto(),"El precio debería ser 6000.0");
-
-        verify(ventaRepository, times(1)).save(any(Venta.class));
+    void listarBoletas_ListaVacia_DeberiaRetornarListaVacia() {
+        when(boletaClient.listarBoletas()).thenReturn(Collections.emptyList());
+ 
+        List<BoletaVentaDTO> resultado = ventaService.listarBoletas();
+ 
+        assertNotNull(resultado);
+        assertTrue(resultado.isEmpty());
     }
 
-    //test unitario buscar por id 
     @Test
-    void buscarVenta_CuandoIdExiste(){
-
-        Venta venta = new Venta();
-        venta.setIdVenta(1L);
-        venta.setDescripcionVenta("Ventas de media docena de huevos");
-        when(ventaRepository.findById(1L)).thenReturn(Optional.of(venta));
-
-        VentaDTO resultado = ventaService.findById(1L);
-
-        //then
-        assertNotNull(resultado,"La venta  no deberia ser null");
-        assertEquals("Ventas de media docena de huevos", resultado.getDescripcionVentaDto(),"La descripcion deberia coincidir");
-
-        verify(ventaRepository, times(1)).findById(1L);
+    void obtenerBoletaPorFolio_FolioValido_DeberiaRetornarBoleta() {
+        BoletaVentaDTO boleta = buildBoletaDTO("BOL-001");
+        when(boletaClient.obtenerBoletaPorFolio("BOL-001")).thenReturn(boleta);
+ 
+        BoletaVentaDTO resultado = ventaService.obtenerBoletaPorFolio("BOL-001");
+ 
+        assertNotNull(resultado);
+        assertEquals("BOL-001", resultado.getFolio());
+        verify(boletaClient, times(1)).obtenerBoletaPorFolio("BOL-001");
     }
-
-    //test unitario eliminar por id 
+ 
     @Test
-    void eliminarVentaNoExistente(){
-        when(ventaRepository.existsById(98L)).thenReturn(false);
-        
-        //When y then 
-        assertThrows(IllegalArgumentException.class, ()->{
-            ventaService.eliminarPorId(98L);
-        },"IllegalArgumentException si el id no existe");
-
-        verify(ventaRepository, never()).deleteById(anyLong());
+    void obtenerBoletaPorFolio_FolioNulo_DeberiaLanzarIllegalArgumentException() {
+        assertThrows(IllegalArgumentException.class,
+                () -> ventaService.obtenerBoletaPorFolio(null));
+        verify(boletaClient, never()).obtenerBoletaPorFolio(anyString());
     }
-
-    //test unitario eliminar por id 
+ 
     @Test
-    void eliminarVenta_CuandoIdExiste(){
-        when(ventaRepository.existsById(1L)).thenReturn(true);
-
-        //when
-        ventaService.eliminarPorId(1L);
-
-        //then
-        verify(ventaRepository, times(1)).deleteById(1L);
+    void obtenerBoletaPorFolio_FolioVacio_DeberiaLanzarIllegalArgumentException() {
+        assertThrows(IllegalArgumentException.class,
+                () -> ventaService.obtenerBoletaPorFolio("   "));
+        verify(boletaClient, never()).obtenerBoletaPorFolio(anyString());
     }
 
-    //test unitario actualizar por id 
     @Test
-    void actualizarVenta_CuandoIdNoExista(){
-        Long idInexistente = 98L;
-        VentaDTO ventadto = new VentaDTO();
-        ventadto.setDescripcionVentaDto("descripcion de prueba");
-
-        when(ventaRepository.findById(idInexistente)).thenReturn(Optional.empty());
-
-        //when y then
-        assertThrows(RecursoNoEncontradoException.class, ()->{
-            ventaService.actualizarVenta(idInexistente, ventadto);
-        });
+    void crearBoletaParaVenta_Exitosa_DeberiaRetornarBoletaCreada() {
+        BoletaVentaDTO dto = buildBoletaDTO("BOL-001");
+        when(boletaClient.crearBoleta(dto)).thenReturn(dto);
+ 
+        BoletaVentaDTO resultado = ventaService.crearBoletaParaVenta(dto);
+ 
+        assertNotNull(resultado);
+        assertEquals("BOL-001", resultado.getFolio());
+        verify(boletaClient, times(1)).crearBoleta(dto);
     }
-
-    //test unitario actualizar por id 
+ 
     @Test
-    void actualizarVenta_CuandoIdExiste(){
-        Long id=1L;
-        Venta ventaexistente = new Venta();
-        ventaexistente.setIdVenta(id);
-        ventaexistente.setDescripcionVenta("Descripcion Original");
-
-        VentaDTO ventadto = new VentaDTO();
-        ventadto.setDescripcionVentaDto("Descripcion Ocupada");
-
-        when(ventaRepository.findById(id)).thenReturn(Optional.of(ventaexistente));
-        when(ventaRepository.existsByDescripcionVenta("Descripcion Ocupada")).thenReturn(true);
-
-        //when y then
-        assertThrows(IllegalArgumentException.class,()->{
-            ventaService.actualizarVenta(id, ventadto);
-        },"IllegalArgumentException si la nueva descripcion ya es existente");
-
+    void crearBoletaParaVenta_FolioNulo_DeberiaLanzarIllegalArgumentException() {
+        BoletaVentaDTO dto = new BoletaVentaDTO();
+        dto.setFolio(null);
+ 
+        assertThrows(IllegalArgumentException.class,
+                () -> ventaService.crearBoletaParaVenta(dto));
+        verify(boletaClient, never()).crearBoleta(any());
     }
-
-    //test unitario actualizar por id 
+ 
     @Test
-    void actualizarVentas_DeberiaRetornarVentaActualizada(){
-        Long id=1L;
-        Venta venta = new Venta();
-        venta.setIdVenta(id);
-        venta.setDescripcionVenta("Descripcion Original");
-
-        VentaDTO ventadto = new VentaDTO();
-        ventadto.setDescripcionVentaDto("Descripcion Nuevo");
-        ventadto.setMontoPagoVentaDto(20000.0);
-        
-        when(ventaRepository.findById(id)).thenReturn(Optional.of(venta));
-        when(ventaRepository.existsByDescripcionVenta("Descripcion Nuevo")).thenReturn(false);
-        when(ventaRepository.save(any(Venta.class))).thenReturn(venta);
-
-        //when
-        VentaDTO resultado = ventaService.actualizarVenta(id, ventadto);
-
-        //then
-        assertNotNull(resultado,"El resultado no deberia ser null");
-        assertEquals("Descripcion Nuevo", resultado.getDescripcionVentaDto(),"La Descripcion deberia actualizarse");
-        verify(ventaRepository, times(1)).save(any(Venta.class));
-
+    void crearBoletaParaVenta_FolioVacio_DeberiaLanzarIllegalArgumentException() {
+        BoletaVentaDTO dto = new BoletaVentaDTO();
+        dto.setFolio("  ");
+ 
+        assertThrows(IllegalArgumentException.class,
+                () -> ventaService.crearBoletaParaVenta(dto));
+        verify(boletaClient, never()).crearBoleta(any());
     }
-
-
+ 
+    @Test
+    void crearBoletaParaVenta_FechaFutura_DeberiaLanzarIllegalArgumentException() {
+        BoletaVentaDTO dto = buildBoletaDTO("BOL-001");
+        dto.setFecha(LocalDate.now().plusDays(1)); 
+ 
+        assertThrows(IllegalArgumentException.class,
+                () -> ventaService.crearBoletaParaVenta(dto));
+        verify(boletaClient, never()).crearBoleta(any());
+    }
+ 
+    @Test
+    void crearBoletaParaVenta_FechaHoy_DeberiaPermitirse() {
+        BoletaVentaDTO dto = buildBoletaDTO("BOL-001");
+        dto.setFecha(LocalDate.now());
+        when(boletaClient.crearBoleta(dto)).thenReturn(dto);
+ 
+        assertDoesNotThrow(() -> ventaService.crearBoletaParaVenta(dto));
+        verify(boletaClient, times(1)).crearBoleta(dto);
+    }
+ 
+    @Test
+    void crearBoletaParaVenta_SinFecha_DeberiaPermitirse() {
+        BoletaVentaDTO dto = buildBoletaDTO("BOL-001");
+        dto.setFecha(null); 
+        when(boletaClient.crearBoleta(dto)).thenReturn(dto);
+ 
+        assertDoesNotThrow(() -> ventaService.crearBoletaParaVenta(dto));
+    }
+ 
+    @Test
+    void actualizarEstadoBoleta_Exitosa_DeberiaRetornarBoletaActualizada() {
+        BoletaVentaDTO dto = buildBoletaDTO("BOL-001");
+        dto.setEstado("PAGADA");
+        when(boletaClient.actualizarBoleta("BOL-001", dto)).thenReturn(dto);
+ 
+        BoletaVentaDTO resultado = ventaService.actualizarEstadoBoleta("BOL-001", dto);
+ 
+        assertNotNull(resultado);
+        assertEquals("PAGADA", resultado.getEstado());
+        verify(boletaClient, times(1)).actualizarBoleta("BOL-001", dto);
+    }
+ 
+    @Test
+    void actualizarEstadoBoleta_FolioNulo_DeberiaLanzarIllegalArgumentException() {
+        BoletaVentaDTO dto = buildBoletaDTO("BOL-001");
+ 
+        assertThrows(IllegalArgumentException.class,
+                () -> ventaService.actualizarEstadoBoleta(null, dto));
+        verify(boletaClient, never()).actualizarBoleta(anyString(), any());
+    }
+ 
+    @Test
+    void actualizarEstadoBoleta_FolioVacio_DeberiaLanzarIllegalArgumentException() {
+        BoletaVentaDTO dto = buildBoletaDTO("BOL-001");
+ 
+        assertThrows(IllegalArgumentException.class,
+                () -> ventaService.actualizarEstadoBoleta("  ", dto));
+        verify(boletaClient, never()).actualizarBoleta(anyString(), any());
+    }
+ 
+    @Test
+    void actualizarEstadoBoleta_FechaFutura_DeberiaLanzarIllegalArgumentException() {
+        BoletaVentaDTO dto = buildBoletaDTO("BOL-001");
+        dto.setFecha(LocalDate.now().plusDays(5));
+ 
+        assertThrows(IllegalArgumentException.class,
+                () -> ventaService.actualizarEstadoBoleta("BOL-001", dto));
+        verify(boletaClient, never()).actualizarBoleta(anyString(), any());
+    }
+ 
+    @Test
+    void actualizarEstadoBoleta_SinFecha_DeberiaPermitirse() {
+        BoletaVentaDTO dto = buildBoletaDTO("BOL-001");
+        dto.setFecha(null);
+        when(boletaClient.actualizarBoleta("BOL-001", dto)).thenReturn(dto);
+ 
+        assertDoesNotThrow(() -> ventaService.actualizarEstadoBoleta("BOL-001", dto));
+    }
+ 
+    @Test
+    void eliminarBoletaDeVenta_FolioValido_DeberiaLlamarAlClient() {
+        doNothing().when(boletaClient).eliminarBoleta("BOL-001");
+ 
+        assertDoesNotThrow(() -> ventaService.eliminarBoletaDeVenta("BOL-001"));
+        verify(boletaClient, times(1)).eliminarBoleta("BOL-001");
+    }
+ 
+    @Test
+    void eliminarBoletaDeVenta_FolioNulo_DeberiaLanzarIllegalArgumentException() {
+        assertThrows(IllegalArgumentException.class,
+                () -> ventaService.eliminarBoletaDeVenta(null));
+        verify(boletaClient, never()).eliminarBoleta(anyString());
+    }
+ 
+    @Test
+    void eliminarBoletaDeVenta_FolioVacio_DeberiaLanzarIllegalArgumentException() {
+        assertThrows(IllegalArgumentException.class,
+                () -> ventaService.eliminarBoletaDeVenta(""));
+        verify(boletaClient, never()).eliminarBoleta(anyString());
+    }
 }
-

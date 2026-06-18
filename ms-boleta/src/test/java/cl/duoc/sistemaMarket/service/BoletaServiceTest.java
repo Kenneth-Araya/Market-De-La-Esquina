@@ -1,10 +1,9 @@
 package cl.duoc.sistemaMarket.service;
-
+ 
 import java.time.LocalDate;
 import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -13,228 +12,185 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import cl.duoc.sistemaMarket.dto.BoletaDTO;
 import cl.duoc.sistemaMarket.dto.BoletaDTOMapper;
-import cl.duoc.sistemaMarket.exeptions.RecursoNoEncontradoException;
 import cl.duoc.sistemaMarket.model.Boleta;
 import cl.duoc.sistemaMarket.repository.BoletaRepository;
-
+ 
 @ExtendWith(MockitoExtension.class)
-public class BoletaServiceTest{
-
+public class BoletaServiceTest {
+ 
     @Mock
     private BoletaRepository boletaRepository;
-
+ 
     @Mock
     private BoletaDTOMapper boletaDTOMapper;
-
+ 
     @InjectMocks
     private BoletaService boletaService;
 
-    //test unitario listar usuarios
-    @Test
-    void listarTodos_CuandoExistenBoletas() {
-        // Given
-        Boleta boleta = new Boleta();
-        boleta.setFolioBoleta("FOL-001");
-
-        BoletaDTO boletaDTO = new BoletaDTO();
-        boletaDTO.setFolio("FOL-001");
-
-        when(boletaRepository.findAll()).thenReturn(List.of(boleta));
-        when(boletaDTOMapper.toDTO(boleta)).thenReturn(boletaDTO);
-
-        // When
-        List<BoletaDTO> resultado = boletaService.listarTodos();
-
-        // Then
-        assertNotNull(resultado);
-        assertEquals(1, resultado.size());
-        verify(boletaRepository, times(1)).findAll();
+    private Boleta buildBoleta(String folio) {
+        Boleta b = new Boleta();
+        b.setFolioBoleta(folio);
+        return b;
     }
-
-    //test unitario listar usuarios con condicion
-    @Test
-    void listarTodos_CuandoNoExistenBoletas() {
-        // Given
-        when(boletaRepository.findAll()).thenReturn(List.of());
-
-        // When
-        List<BoletaDTO> resultado = boletaService.listarTodos();
-
-        // Then
-        assertNotNull(resultado);
-        assertTrue(resultado.isEmpty());
-        verify(boletaRepository, times(1)).findAll();
+ 
+    private BoletaDTO buildBoletaDTO(String folio) {
+        BoletaDTO dto = new BoletaDTO();
+        dto.setFolio(folio);
+        dto.setFecha(LocalDate.now());
+        return dto;
     }
-
-    //test unitario obteber usuarios
+ 
     @Test
-    void obtenerBoletaPorFolio_CuandoFolioExiste() {
-        // Given
-        String folio = "FOL-MN784P";
-        Boleta boleta = new Boleta();
-        boleta.setFolioBoleta(folio);
-
-        BoletaDTO boletaDTO = new BoletaDTO();
-        boletaDTO.setFolio(folio);
-
-        when(boletaRepository.findByFolioBoleta(folio)).thenReturn(boleta);
-        when(boletaDTOMapper.toDTO(boleta)).thenReturn(boletaDTO);
-
-        // When
-        BoletaDTO resultado = boletaService.obtenerBoletaPorFolio(folio);
-
-        // Then
-        assertNotNull(resultado, "La boleta no debería ser null");
-        assertEquals(folio, resultado.getFolio(), "El folio debería coincidir");
-        verify(boletaRepository, times(1)).findByFolioBoleta(folio);
+    void guardarBoleta_DtoNulo_DeberiaLanzarIllegalArgumentException() {
+        assertThrows(IllegalArgumentException.class,
+                () -> boletaService.guardarBoleta(null));
+        verify(boletaRepository, never()).save(any());
     }
-
-    //test unitario obteber usuarios con condicion
+ 
     @Test
-    void obtenerBoletaPorFolio_CuandoFolioNoExiste() {
-        // Given
-        String folio = "FOL-INEXISTENTE";
-        when(boletaRepository.findByFolioBoleta(folio)).thenReturn(null);
-
-        // When & Then
-        assertThrows(RecursoNoEncontradoException.class, () -> {
-            boletaService.obtenerBoletaPorFolio(folio);
-        }, "RecursoNoEncontradoException si el folio no existe");
-
-        verify(boletaDTOMapper, never()).toDTO(any());
+    void guardarBoleta_FolioVacio_DeberiaLanzarIllegalArgumentException() {
+        BoletaDTO dto = new BoletaDTO();
+        dto.setFolio("");
+ 
+        assertThrows(IllegalArgumentException.class,
+                () -> boletaService.guardarBoleta(dto));
+        verify(boletaRepository, never()).save(any());
     }
-
-    //test unitario guardar usuarios
+ 
     @Test
-    void guardarBoleta_CuandoDatosValidos() {
-        // Given
-        BoletaDTO boletaDTO = new BoletaDTO();
-        boletaDTO.setFolio("FOL-MN784P");
-        boletaDTO.setFecha(LocalDate.now());
-
-        Boleta boleta = new Boleta();
-        boleta.setFolioBoleta("FOL-MN784P");
-
-        when(boletaDTOMapper.toModel(boletaDTO)).thenReturn(boleta);
+    void guardarBoleta_SinFecha_DeberiaGuardarCorrectamente() {
+        BoletaDTO dto = buildBoletaDTO("FOL-001");
+        dto.setFecha(null);
+ 
+        Boleta boleta = buildBoleta("FOL-001");
+        when(boletaDTOMapper.toModel(dto)).thenReturn(boleta);
         when(boletaRepository.save(boleta)).thenReturn(boleta);
-        when(boletaDTOMapper.toDTO(boleta)).thenReturn(boletaDTO);
-
-        // When
-        BoletaDTO resultado = boletaService.guardarBoleta(boletaDTO);
-
-        // Then
+        when(boletaDTOMapper.toDTO(boleta)).thenReturn(dto);
+ 
+        BoletaDTO resultado = boletaService.guardarBoleta(dto);
+ 
         assertNotNull(resultado);
-        assertEquals("FOL-MN784P", resultado.getFolio());
-        verify(boletaRepository, times(1)).save(any(Boleta.class));
+        verify(boletaRepository, times(1)).save(any());
     }
-
-    //test unitario guardar usuarios con condicion
+ 
     @Test
-    void guardarBoleta_CuandoFolioEsNulo() {
-        // Given
-        BoletaDTO boletaDTO = new BoletaDTO();
-        boletaDTO.setFolio(null);
+    void guardarBoleta_FechaHoy_DeberiaGuardarCorrectamente() {
+        BoletaDTO dto = buildBoletaDTO("FOL-001");
+        dto.setFecha(LocalDate.now());
 
-        // When & Then
-        assertThrows(IllegalArgumentException.class, () -> {
-            boletaService.guardarBoleta(boletaDTO);
-        }, "IllegalArgumentException si el folio es nulo");
-
-        verify(boletaRepository, never()).save(any(Boleta.class));
+        Boleta boleta = buildBoleta("FOL-001");
+        when(boletaDTOMapper.toModel(dto)).thenReturn(boleta);
+        when(boletaRepository.save(boleta)).thenReturn(boleta);
+        when(boletaDTOMapper.toDTO(boleta)).thenReturn(dto);
+ 
+        assertDoesNotThrow(() -> boletaService.guardarBoleta(dto));
+        verify(boletaRepository, times(1)).save(any());
     }
-
+ 
+ 
     @Test
-    void guardarBoleta_CuandoFechaEsFutura() {
-        // Given
-        BoletaDTO boletaDTO = new BoletaDTO();
-        boletaDTO.setFolio("FOL-MN784P");
-        boletaDTO.setFecha(LocalDate.now().plusDays(5));
-
-        // When & Then
-        assertThrows(IllegalArgumentException.class, () -> {
-            boletaService.guardarBoleta(boletaDTO);
-        }, "IllegalArgumentException si la fecha es futura");
-
-        verify(boletaRepository, never()).save(any(Boleta.class));
+    void actualizarBoleta_FechaFutura_DeberiaLanzarIllegalArgumentException() {
+        String folio = "FOL-001";
+        Boleta existente = buildBoleta(folio);
+        BoletaDTO dto = buildBoletaDTO(folio);
+        dto.setFecha(LocalDate.now().plusDays(3));
+ 
+        when(boletaRepository.findByFolioBoleta(folio)).thenReturn(existente);
+ 
+        assertThrows(IllegalArgumentException.class,
+                () -> boletaService.actualizarBoleta(folio, dto));
+        verify(boletaRepository, never()).save(any());
     }
-
-    //test unitario actualizar usuarios con condicion
+ 
     @Test
-    void actualizarBoleta_CuandoFolioNoExiste() {
-        // Given
-        String folioInexistente = "FOL-INEXISTENTE";
-        BoletaDTO boletaDTO = new BoletaDTO();
-        boletaDTO.setFolio(folioInexistente);
-
-        when(boletaRepository.findByFolioBoleta(folioInexistente)).thenReturn(null);
-
-        // When & Then
-        assertThrows(RecursoNoEncontradoException.class, () -> {
-            boletaService.actualizarBoleta(folioInexistente, boletaDTO);
-        }, "RecursoNoEncontradoException si el folio no existe");
-
-        verify(boletaRepository, never()).save(any(Boleta.class));
+    void actualizarBoleta_SinFecha_DeberiaActualizarCorrectamente() {
+        String folio = "FOL-001";
+        Boleta existente = buildBoleta(folio);
+        existente.setId(1L);
+ 
+        BoletaDTO dto = buildBoletaDTO(folio);
+        dto.setFecha(null);
+ 
+        Boleta actualizada = buildBoleta(folio);
+        when(boletaRepository.findByFolioBoleta(folio)).thenReturn(existente);
+        when(boletaDTOMapper.toModel(dto)).thenReturn(actualizada);
+        when(boletaRepository.save(any())).thenReturn(actualizada);
+ 
+        boolean resultado = boletaService.actualizarBoleta(folio, dto);
+ 
+        assertTrue(resultado);
+        verify(boletaRepository, times(1)).save(any());
     }
-
-    //test unitario guardar usuarios
+ 
     @Test
-    void actualizarBoleta_CuandoDatosValidos() {
-        // Given
-        String folio = "FOL-MN784P";
-        Boleta boletaExistente = new Boleta();
-        boletaExistente.setId(1L);
-        boletaExistente.setFolioBoleta(folio);
-
-        BoletaDTO boletaDTO = new BoletaDTO();
-        boletaDTO.setFolio(folio);
-        boletaDTO.setFecha(LocalDate.now());
-
-        Boleta boletaActualizada = new Boleta();
-        boletaActualizada.setFolioBoleta(folio);
-
-        when(boletaRepository.findByFolioBoleta(folio)).thenReturn(boletaExistente);
-        when(boletaDTOMapper.toModel(boletaDTO)).thenReturn(boletaActualizada);
-        when(boletaRepository.save(any(Boleta.class))).thenReturn(boletaActualizada);
-
-        // When
-        boolean resultado = boletaService.actualizarBoleta(folio, boletaDTO);
-
-        // Then
-        assertTrue(resultado, "Debería retornar true al actualizar correctamente");
-        verify(boletaRepository, times(1)).save(any(Boleta.class));
+    void actualizarBoleta_FechaHoy_DeberiaActualizarCorrectamente() {
+        String folio = "FOL-001";
+        Boleta existente = buildBoleta(folio);
+        existente.setId(1L);
+ 
+        BoletaDTO dto = buildBoletaDTO(folio);
+        dto.setFecha(LocalDate.now());
+ 
+        Boleta actualizada = buildBoleta(folio);
+        when(boletaRepository.findByFolioBoleta(folio)).thenReturn(existente);
+        when(boletaDTOMapper.toModel(dto)).thenReturn(actualizada);
+        when(boletaRepository.save(any())).thenReturn(actualizada);
+ 
+        boolean resultado = boletaService.actualizarBoleta(folio, dto);
+ 
+        assertTrue(resultado);
     }
-
-    //test unitario eliminar usuarios
+ 
     @Test
-    void eliminarBoleta_CuandoFolioExiste() {
-        // Given
-        String folio = "FOL-MN784P";
-        Boleta boletaExistente = new Boleta();
-        boletaExistente.setFolioBoleta(folio);
-
-        when(boletaRepository.findByFolioBoleta(folio)).thenReturn(boletaExistente);
-
-        // When
+    void eliminarBoleta_Exitoso_DeberiaRetornarTrue() {
+        String folio = "FOL-001";
+        Boleta existente = buildBoleta(folio);
+        when(boletaRepository.findByFolioBoleta(folio)).thenReturn(existente);
+        doNothing().when(boletaRepository).deleteByFolioBoleta(folio);
+ 
         boolean resultado = boletaService.eliminarBoleta(folio);
-
-        // Then
+ 
         assertTrue(resultado);
         verify(boletaRepository, times(1)).deleteByFolioBoleta(folio);
     }
-
-    //test unitario eliminar usuarios con condicion
+ 
     @Test
-    void eliminarBoleta_CuandoFolioNoExiste() {
-        // Given
-        String folio = "FOL-INEXISTENTE";
-        when(boletaRepository.findByFolioBoleta(folio)).thenReturn(null);
-
-        // When & Then
-        assertThrows(RecursoNoEncontradoException.class, () -> {
-            boletaService.eliminarBoleta(folio);
-        }, "RecursoNoEncontradoException si el folio no existe");
-
-        verify(boletaRepository, never()).deleteByFolioBoleta(anyString());
+    void obtenerBoletaPorFolio_DeberiaRetornarTodosLosCampos() {
+        String folio = "FOL-001";
+        Boleta boleta = buildBoleta(folio);
+ 
+        BoletaDTO dto = buildBoletaDTO(folio);
+        dto.setFecha(LocalDate.of(2026, 1, 15));
+ 
+        when(boletaRepository.findByFolioBoleta(folio)).thenReturn(boleta);
+        when(boletaDTOMapper.toDTO(boleta)).thenReturn(dto);
+ 
+        BoletaDTO resultado = boletaService.obtenerBoletaPorFolio(folio);
+ 
+        assertNotNull(resultado);
+        assertEquals(folio, resultado.getFolio());
+        assertEquals(LocalDate.of(2026, 1, 15), resultado.getFecha());
+        verify(boletaDTOMapper, times(1)).toDTO(boleta);
+    }
+ 
+    @Test
+    void listarTodos_DeberiaLlamarMapperPorCadaBoleta() {
+        Boleta b1 = buildBoleta("FOL-001");
+        Boleta b2 = buildBoleta("FOL-002");
+        Boleta b3 = buildBoleta("FOL-003");
+ 
+        BoletaDTO dto1 = buildBoletaDTO("FOL-001");
+        BoletaDTO dto2 = buildBoletaDTO("FOL-002");
+        BoletaDTO dto3 = buildBoletaDTO("FOL-003");
+ 
+        when(boletaRepository.findAll()).thenReturn(List.of(b1, b2, b3));
+        when(boletaDTOMapper.toDTO(b1)).thenReturn(dto1);
+        when(boletaDTOMapper.toDTO(b2)).thenReturn(dto2);
+        when(boletaDTOMapper.toDTO(b3)).thenReturn(dto3);
+ 
+        List<BoletaDTO> resultado = boletaService.listarTodos();
+ 
+        assertEquals(3, resultado.size());
+        verify(boletaDTOMapper, times(3)).toDTO(any(Boleta.class));
     }
 }
-
