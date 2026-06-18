@@ -30,31 +30,44 @@ services:
     depends_on:
       - eureka-server
     environment:
+      - SPRING_APPLICATION_NAME=ms-venta
       - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka
+      - DB_URL=jdbc:postgresql://aws-1-sa-east-1.pooler.supabase.com:6543/postgres?sslmode=require&prepareThreshold=0
+      - DB_USER=postgres.rlsuzveutyfpasskdfix
+      - DB_PASSWORD=Ns!nqpWK$C8bR$x
+      
     networks:
       - ms-network
 
   ms-boletas:
     build: ./ms-boleta
-    container_name: ms-boletas
+    container_name: ms-boleta
     ports:
       - "8081:8081"
     depends_on:
       - eureka-server
     environment:
+      - SPRING_APPLICATION_NAME=ms-boleta
       - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka
+      - DB_URL=spring.datasource.url=jdbc:postgresql://aws-1-sa-east-1.pooler.supabase.com:6543/postgres?sslmode=require
+      - DB_USER=postgres.rlsuzveutyfpasskdfix
+      - DB_PASSWORD=Ns!nqpWK$C8bR$x
     networks:
       - ms-network
 
   ms-usuarios:
     build: ./ms-usuario
-    container_name: ms-usuarios
+    container_name: ms-usuario
     ports:
       - "8082:8082"
     depends_on:
       - eureka-server
     environment:
+      - SPRING_APPLICATION_NAME=ms-usuario
       - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka
+      - DB_URL=spring.datasource.url=jdbc:postgresql://aws-1-sa-east-1.pooler.supabase.com:6543/postgres?sslmode=require
+      - DB_USER=postgres.rlsuzveutyfpasskdfix
+      - DB_PASSWORD=Ns!nqpWK$C8bR$x
     networks:
       - ms-network
 
@@ -66,7 +79,11 @@ services:
     depends_on:
       - eureka-server
     environment:
+      - SPRING_APPLICATION_NAME=ms-producto
       - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka
+      - DB_URL=spring.datasource.url=jdbc:postgresql://aws-1-sa-east-1.pooler.supabase.com:6543/postgres?sslmode=require
+      - DB_USER=postgres.rlsuzveutyfpasskdfix
+      - DB_PASSWORD=Ns!nqpWK$C8bR$x
     networks:
       - ms-network
 
@@ -78,7 +95,11 @@ services:
     depends_on:
       - eureka-server
     environment:
+      - SPRING_APPLICATION_NAME=ms-inventario
       - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka
+      - DB_URL=jdbc:postgresql://aws-1-sa-east-1.pooler.supabase.com:6543/postgres?sslmode=require&prepareThreshold=0
+      - DB_USER=postgres.rlsuzveutyfpasskdfix
+      - DB_PASSWORD=Ns!nqpWK$C8bR$x
     networks:
       - ms-network
 
