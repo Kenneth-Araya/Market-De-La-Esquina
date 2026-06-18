@@ -1,8 +1,11 @@
 package cl.duoc.ms_producto.controller;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
 
 import java.util.Arrays;
@@ -21,6 +24,7 @@ import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import cl.duoc.ms_producto.dto.ProductoDTO;
+import cl.duoc.ms_producto.exception.ManejadorGlobalExcepciones;
 import cl.duoc.ms_producto.service.ProductoService;
 
 @WebMvcTest(ProductoController.class)
@@ -91,6 +95,19 @@ public class ProductoControllerTest {
     }
 
     @Test
+    void eliminarProducto_CuandoServicioLanzaIllegalArgument_DeberiaRetornar400() throws Exception {
+        // GIVEN: Forzamos al servicio a lanzar IllegalArgumentException
+        doThrow(new IllegalArgumentException("ID inválido")).when(servicio).eliminarProducto(anyLong());
+
+        // WHEN: Llamamos al endpoint
+        mockMvc.perform(delete("/api/v1/productos/1"))
+               // THEN: Verificamos que el manejador lo atrapó y devolvió 400
+               .andExpect(status().isBadRequest())
+               .andExpect(jsonPath("$.error").value("Error de validación"))
+               .andExpect(jsonPath("$.mensaje").value("ID inválido"));
+    }
+
+    @Test
     void actualizarProducto_DeberiaRetornarStatus200ProductoActualizado() throws Exception{
         //GIVEN EL ID A ACTUALIZAR Y EL DTO CON LOS DATOS NUEVOS
         Long id=1L;
@@ -132,9 +149,64 @@ public class ProductoControllerTest {
                 .andExpect(jsonPath("$.codigoBarra").value("1234567890123"));
     }
 
+    // 1. Cubre: handleRecursoNoEncontrado (404)
+    @Test
+    void listarProductoPorId_CuandoNoExiste_DeberiaRetornar404() throws Exception {
+        Long id = 99L;
+        // Simulamos que el servicio lanza nuestra excepción personalizada
+        when(servicio.buscarProducto(id)).thenThrow(new cl.duoc.ms_producto.exception.RecursoNoEncontradoException("No existe"));
 
+        mockMvc.perform(get("/api/v1/productos/{id}", id))
+               .andExpect(status().isNotFound())
+               .andExpect(jsonPath("$.error").value("Recurso no encontrado"));
+    }
 
-    
+    // 2. Cubre: handleIllegalArgumentException (400)
+    @Test
+    void guardarProducto_CuandoDTOEsInvalido_DeberiaRetornar400() throws Exception {
+        // 1. Preparamos un DTO que no pase las validaciones (ej: nombre vacío)
+        ProductoDTO dtoInvalido = new ProductoDTO();
+        dtoInvalido.setNombre(""); // Asumiendo que tienes @NotBlank en tu DTO
+        // 3. Ejecutamos el post
+        mockMvc.perform(post("/api/v1/productos")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(dtoInvalido)))
+                // 4. Verificamos que el manejador de validaciones atrapó el error
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.nombre").exists()); // Verifica que el campo inválido esté en el mapa
+    }
+
+    // 3. Cubre: handleGenericException (500)
+    @Test
+    void listarProductos_CuandoFallaServidor_DeberiaRetornar500() throws Exception {
+        when(servicio.listarProductos()).thenThrow(new RuntimeException("Error inesperado"));
+
+        mockMvc.perform(get("/api/v1/productos"))
+               .andExpect(status().isInternalServerError());
+    }
+
+    @Test
+    void listarProductoPorId_CuandoIdNoEsNumero_DeberiaRetornar400() throws Exception {
+        // Al enviar "abc" en un PathVariable Long, Spring lanza automáticamente el MethodArgumentTypeMismatchException
+        mockMvc.perform(get("/api/v1/productos/abc"))
+               .andExpect(status().isBadRequest())
+               .andExpect(jsonPath("$.error").value("Parametro invalido"));
+    }
+
+    @Test
+    void testErrorResponseGettersSetters() {
+        // Instanciamos el objeto
+        ManejadorGlobalExcepciones.ErrorResponse error = 
+            new ManejadorGlobalExcepciones.ErrorResponse("Error inicial", "Mensaje inicial");
+
+        // Probamos los Setters
+        error.setError("Error cambiado");
+        error.setMensaje("Mensaje cambiado");
+
+        // Probamos los Getters
+        assertEquals("Error cambiado", error.getError());
+        assertEquals("Mensaje cambiado", error.getMensaje());
+    }
 
 
 

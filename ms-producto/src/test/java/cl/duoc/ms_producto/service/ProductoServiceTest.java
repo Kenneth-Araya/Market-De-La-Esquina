@@ -115,14 +115,14 @@ public class ProductoServiceTest {
     }
 
     @Test
-    void eliminarProducto_CuandoIdNoExiste_DeberiaLanzarUnIllegalArgumentException(){
+    void eliminarProducto_CuandoIdNoExiste_DeberiaLanzarUnRecursoNoEncontradoException(){
         //GIVEN: SIMULAR QUE EL REPO DICE QUE NO EXISTE EL ID
         when(repo.existsById(99L)).thenReturn(false);
         
         //WHEN Y THEN VERIFICAMOS QUE SE LANZA LA EXCEPTION
-        assertThrows(IllegalArgumentException.class, ()->{
+        assertThrows(RecursoNoEncontradoException.class, ()->{
             servicio.eliminarProducto(99L);
-        },"Debería lanzar IllegalArgumentException si el ID no existe");
+        },"Debería lanzar RecursoNoEncontradoException si el ID no existe");
 
         //VERIFICAMOS QUE NUNCA SE LLAMO AL DELETE
         verify(repo, never()).deleteById(anyLong());

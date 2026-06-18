@@ -40,7 +40,7 @@ public class ManejadorGlobalExcepciones {
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-public ResponseEntity<Map<String, String>> handleValidationExceptions(MethodArgumentNotValidException ex) {
+    public ResponseEntity<Map<String, String>> handleValidationExceptions(MethodArgumentNotValidException ex) {
     Map<String, String> errors = new HashMap<>();
     
     // Esto recorre todos los campos que fallaron y guarda el mensaje de error de cada uno
@@ -51,7 +51,7 @@ public ResponseEntity<Map<String, String>> handleValidationExceptions(MethodArgu
     return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errors);
 }
 
-    public class ErrorResponse {
+    public static class ErrorResponse {
         private String error;
         private String mensaje;
 
